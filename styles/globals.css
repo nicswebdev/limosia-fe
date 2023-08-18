@@ -1,0 +1,193 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Font */
+@import url("https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap");
+
+@import url("https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,600;1,700;1,900&display=swap");
+/* End Font */
+
+/* Base */
+@layer base {
+    html,
+    body {
+        @apply font-karla font-normal text-[16px] xxl:text-[1.175vw] leading-relaxed scroll-smooth bg-[#FEFEFE];
+    }
+}
+/* End Base */
+
+/* Sidebar Menu */
+@layer components {
+    ul.list-menu > li > a {
+        @apply flex items-center gap-4 px-3 py-2 rounded-full title max-xl:text-xl duration-75;
+    }
+
+    ul.list-menu > li > a:hover,
+    ul.list-menu > li > a.active {
+        @apply bg-orange-light text-white;
+    }
+
+    ul.list-menu > li > a:hover > img,
+    ul.list-menu > li > a.active > img {
+        @apply brightness-0 invert-[1];
+    }
+}
+/* End - Sidebar Menu */
+
+/* Buttons */
+@layer components {
+    .btn-blue {
+        @apply inline-block font-karla font-bold text-xl leading-none text-center py-[0.875rem] px-[3.125rem] rounded-full bg-blue-light text-white duration-700 hover:opacity-75;
+    }
+
+    .btn-gray {
+        @apply btn-blue bg-[#E1E8ED] text-black-2;
+    }
+}
+/* End Buttons */
+
+/* Breadcrumb */
+@layer components {
+    .breadcrumb-list {
+        @apply flex items-center
+        [&>li]:text-xs [&>li]:text-gray-dark 
+        [&>li:not(:first-child):before]:content-["\00a0\/\00a0"]
+        [&>li>a]:text-black-2 hover:[&>li>a]:text-gray-dark [&>li>a]:duration-700;
+    }
+}
+/* End Breadcrumb */
+
+/* Texts */
+@layer components {
+    .title {
+        @apply font-raleway font-bold text-2xl leading-tight text-black-2;
+    }
+
+    .title-orange {
+        @apply font-raleway font-black text-[2.5rem] text-orange-dark;
+    }
+
+    .link {
+        @apply border-b-[0.0625rem] border-b-black-2 hover:border-b-transparent duration-700;
+    }
+}
+/* End Texts */
+
+/* Box Shadow */
+@layer components {
+    .box-shadow {
+        @apply shadow-[0_0_0.625rem_rgba(0,0,0,0.15)];
+    }
+}
+/* End - Box Shadow */
+
+/* Car Card */
+@layer components {
+    .car-card {
+        @apply box-shadow flex max-md:flex-col w-full overflow-hidden rounded-[0.9375rem] text-black-2;
+    }
+
+    .car-card > .image-wrap {
+        @apply md:flex-[0_0_35%] xl:basis-[46%] flex justify-center items-center bg-gray-light;
+    }
+
+    .car-card > .detail-wrap {
+        @apply px-4 py-8 md:p-6 xl:p-10 flex-grow;
+    }
+
+    .car-card > .detail-wrap > .facility-list {
+        @apply grid grid-cols-2 gap-4 pt-4 pb-11;
+    }
+
+    .car-card > .detail-wrap > .facility-list > li {
+        @apply flex items-center gap-2;
+    }
+}
+/* End - Car Card */
+
+/* List */
+@layer components {
+    .list-term > li {
+        @apply relative pl-8 font-bold text-sm leading-loose text-black-2;
+    }
+
+    .list-term > li:before {
+        @apply content-[''] absolute left-0 top-[0.125rem] w-[1.5rem] h-[1.5rem] bg-[url('/assets/images/icons/icon-park-outline_check-one.svg')] bg-no-repeat bg-cover;
+    }
+}
+/* End - List */
+
+/* Form */
+@layer components {
+    .custom-label {
+        @apply px-8 py-4 w-full lg:w-[26rem] max-w-full rounded-full bg-gray-light h-[3.4375rem] max-h-[3.4375rem];
+    }
+
+    .custom-input[type="text"],
+    .custom-input[type="password"] {
+        @apply bg-transparent outline-none w-full font-bold text-black-2;
+    }
+
+    .custom-input[type="text"]::placeholder,
+    .custom-input[type="password"]::placeholder {
+        @apply opacity-100 font-bold text-black-2;
+    }
+
+    .custom-input[type="checkbox"] {
+        @apply appearance-none 
+        absolute left-0 top-[0.125rem]
+        w-6 h-6 rounded-[0.3125rem] bg-white;
+    }
+
+    .custom-input[type="checkbox"]:checked:after {
+        @apply content-['']
+        absolute top-1/2 left-1/2
+        w-3 h-4 border-b-[0.25rem] border-r-[0.25rem] border-orange-light
+        -translate-x-[45%] -translate-y-[60%] rotate-45;
+    }
+
+    .custom-select {
+        @apply custom-label appearance-none outline-none h-[3.4375rem] max-h-[3.4375rem]
+        font-bold leading-none
+        bg-[url('/assets/images/icons/gridicons_dropdown.svg')] bg-no-repeat bg-[right_1rem_center];
+    }
+}
+/* End - Form */
+
+/* Custom CSS */
+.hero-linear:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(rgb(31, 31, 31), transparent 30%, transparent);
+    z-index: 1;
+    height: 26rem;
+}
+
+.form-control {
+    background: transparent;
+    outline: none;
+}
+
+.react-multiple-carousel__arrow--left {
+    left: calc(0% + 1px) !important;
+}
+
+.react-multiple-carousel__arrow--right {
+    right: calc(0% + 1px) !important;
+}
+
+.bg-two-linear {
+    background: linear-gradient(
+        to bottom,
+        #ed7a48 0%,
+        #ed7a48 70%,
+        #e8ecf2 70%,
+        #e8ecf2 100%
+    );
+}
+/* End - Custom CSS */
