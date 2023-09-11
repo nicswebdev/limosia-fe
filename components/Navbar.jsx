@@ -101,7 +101,9 @@ const Navbar = () => {
                         <div className="group">
                             <select className="rounded-xl border-2 border-[#868686] p-1">
                                 <option value={`USD`}>USD</option>
-                                <option value={`THB`}>THB</option>
+                                <option value={`THB`} selected>
+                                    THB
+                                </option>
                             </select>
                         </div>
                     </div>

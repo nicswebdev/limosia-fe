@@ -8,7 +8,7 @@ import WhyCard from "@/components/WhyCard";
 import WorksCard from "@/components/WorksCard";
 import TestimoniCard from "@/components/TestimoniCard";
 
-export default function Home() {
+export default function Home({carClassData, airportData}) {
     const responsive3 = {
         superLargeDesktop: {
             // the naming can be any, depends on you.
@@ -33,7 +33,7 @@ export default function Home() {
             <Head>
                 <title>Limosia</title>
             </Head>
-            <Hero />
+            <Hero airportData={airportData} />
             <div className="w-full flex items-center flex-col justify-center px-10 pt-[6%]">
                 <h5 className="raleway text-[40px] font-bold text-[#FE5B02]">
                     Book A Ride with Limosia
@@ -52,16 +52,21 @@ export default function Home() {
                     autoPlaySpeed={3200}
                     showDots={false}
                 >
-                    <CarClass
-                        image={`/assets/sedan-standard.png`}
-                        title={`Sedan Standard`}
-                    />
-                    <CarClass
-                        image={`/assets/sedan-premium.png`}
-                        title={`Sedan Premium`}
-                    />
-                    <CarClass image={`/assets/suv.png`} title={`SUV`} />
-                    <CarClass image={`/assets/mpv.png`} title={`MPV`} />
+                    {carClassData.items.map((item, index) => {
+                        return (
+                            <>
+                                <CarClass
+                                    key={item.id}
+                                    image={item.image}
+                                    title={item.name}
+                                    guest={item.max_guest}
+                                    suitcase={item.max_suitcase}
+                                    description={item.description}
+                                    carid={item.id}
+                                />
+                            </>
+                        );
+                    })}
                 </Carousel>
             </div>
             <div className="w-full bg-two-linear flex items-center flex-col justify-center px-10 py-[6%]">
@@ -199,4 +204,21 @@ export default function Home() {
             </div>
         </div>
     );
+}
+
+export async function getServerSideProps() {
+    const carClassData = await fetch(
+        `https://phpstack-833267-3799658.cloudwaysapps.com/api/v1/car-class?page=1&limit=10&sortBy=ASC`
+    ).then((res) => res.json());
+
+    const airportData = await fetch(
+        `https://phpstack-833267-3799658.cloudwaysapps.com/api/v1/airports?page=1&limit=10&sortBy=ASC`
+    ).then((res) => res.json());
+
+    return {
+        props: {
+            carClassData,
+            airportData,
+        },
+    };
 }

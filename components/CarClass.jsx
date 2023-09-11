@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
-const CarClass = ({image, title}) => {
+const CarClass = ({image, title, guest, suitcase, description, carid}) => {
     return (
         <div className="flex p-2 w-full h-300 md:p-4 md:w-300 md:h-300 rounded-lg">
             <div className="flex flex-col w-full border border-solid rounded-lg shadow-md border-[#d2d2d2]">
@@ -20,7 +20,7 @@ const CarClass = ({image, title}) => {
                         <Link href={`/car-details`}>{title}</Link>
                     </h1>
                     <div className="text-[16px] text-[#868686] karla">
-                        Toyota Atlis or similar
+                        {description}
                     </div>
                     <div className="grid grid-cols-1 gap-2 my-2 md:grid-cols-2">
                         <div className="flex gap-1 items-center">
@@ -33,7 +33,7 @@ const CarClass = ({image, title}) => {
                                 />
                             </div>
                             <span className="karla text-[14px] text-[#1E1E1E]">
-                                4 People
+                                {guest} People
                             </span>
                         </div>
                         <div className="flex gap-1 items-center">
@@ -46,10 +46,10 @@ const CarClass = ({image, title}) => {
                                 />
                             </div>
                             <span className="karla text-[14px] text-[#1E1E1E]">
-                                3 pcs
+                                {suitcase} pcs
                             </span>
                         </div>
-                        <div className="flex gap-1 items-center">
+                        {/* <div className="flex gap-1 items-center">
                             <div className="relative w-[24px] h-[24px]">
                                 <Image
                                     src={`/assets/icon-ac.png`}
@@ -61,11 +61,11 @@ const CarClass = ({image, title}) => {
                             <span className="karla text-[14px] text-[#1E1E1E]">
                                 AC
                             </span>
-                        </div>
+                        </div> */}
                     </div>
 
                     <div className="flex gap-4 justify-center my-8">
-                        <Link href={`/car-details`}>
+                        <Link href={`/car-details/${carid}`}>
                             <button className="bg-[#1BA0E2] text-white rounded-[100px] py-2 px-6 karla text-[20px] hover:bg-[#915516]">
                                 More Details
                             </button>
