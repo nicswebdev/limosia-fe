@@ -4,7 +4,7 @@ import React from "react";
 
 const Works = ({image, title}) => {
     return (
-        <div className="flex p-2 w-full h-300 md:p-[0.2rem] md:w-300 md:h-300 rounded-lg">
+        <div className="flex p-2 w-full h-300 md:p-[0.2rem] md:w-300 md:h-300 rounded-lg ">
             <div className="flex flex-col bg-white w-full border-2 border-solid border-[#285CA7] rounded-lg shadow-md">
                 <div className="relative py-5 flex justify-center items-center w-full h-[15vh]">
                     <div className="flex justify-center items-center w-[160px] h-[160px] mt-[-50%] rounded-[50%] bg-[#77D0E5]">
