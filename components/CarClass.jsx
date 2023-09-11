@@ -4,7 +4,7 @@ import React from "react";
 
 const CarClass = ({image, title, guest, suitcase, description, carid}) => {
     return (
-        <div className="flex p-2 w-full h-300 md:p-4 md:w-300 md:h-300 rounded-lg">
+        <div className="flex p-9 w-full h-300 md:p-4 md:w-300 md:h-300 rounded-lg">
             <div className="flex flex-col w-full border border-solid rounded-lg shadow-md border-[#d2d2d2]">
                 <div className="relative w-full h-[45vh]">
                     <Image
