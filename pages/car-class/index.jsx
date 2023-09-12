@@ -360,11 +360,12 @@ const CarClass = ({ carClassData, priceSchema }) => {
 export default CarClass;
 
 export async function getServerSideProps() {
+  const apiPath = process.env.NEXT_PUBLIC_API_PATH;
   const carClassData = await fetch(
-    `http://localhost:3333/api/v1/car-class?page=1&limit=10&sortBy=ASC`
+    `${apiPath}/car-class?page=1&limit=10&sortBy=ASC`
   ).then((res) => res.json());
   const priceSchema = await fetch(
-    `http://localhost:3333/api/v1/price-schema?page=1&limit=10&sortBy=ASC`
+    `${apiPath}/price-schema?page=1&limit=10&sortBy=ASC`
   ).then((res) => res.json());
 
   return {
