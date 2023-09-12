@@ -1,138 +1,161 @@
 import {
-    DirectionsRenderer,
-    GoogleMap,
-    useJsApiLoader,
+  DirectionsRenderer,
+  GoogleMap,
+  useJsApiLoader,
 } from "@react-google-maps/api";
 import Head from "next/head";
 import Link from "next/link";
-import {useRouter} from "next/router";
-import React, {useEffect, useRef, useState} from "react";
+import { useRouter } from "next/router";
+import React, { useEffect, useRef, useState } from "react";
 
-const CarClass = ({carClassData}) => {
-    const mapRef = useRef(null);
-    const router = useRouter();
-    const {origin_place_id, destination_place_id} = router.query;
+const CarClass = ({ carClassData, priceSchema }) => {
+  const mapRef = useRef(null);
+  const router = useRouter();
+  const { origin_place_id, destination_place_id } = router.query;
 
-    const [directionsResponse, setDirectionsResponse] = useState(null);
-    const [distance, setDistance] = useState("");
-    const [duration, setDuration] = useState("");
+  const [directionsResponse, setDirectionsResponse] = useState(null);
+  const [distance, setDistance] = useState("");
+  const [duration, setDuration] = useState("");
+  const [distanceValue, setDistanceValue] = useState(0);
 
-    useEffect(() => {
-        const initMap = () => {
-            if (origin_place_id && destination_place_id) {
-                const map = new google.maps.Map(mapRef.current, {
-                    zoom: 15,
-                    center: {lat: 13.7566, lng: 100.49914},
-                    options: {
-                        zoomControl: false,
-                        streetViewControl: false,
-                        mapTypeControl: false,
-                    },
-                });
+  useEffect(() => {
+    const initMap = () => {
+      if (origin_place_id && destination_place_id) {
+        const map = new google.maps.Map(mapRef.current, {
+          zoom: 15,
+          center: { lat: 13.7566, lng: 100.49914 },
+          options: {
+            zoomControl: false,
+            streetViewControl: false,
+            mapTypeControl: false,
+          },
+        });
 
-                const directionsService = new google.maps.DirectionsService();
-                const directionsRenderer = new google.maps.DirectionsRenderer();
-                directionsRenderer.setMap(map);
+        const directionsService = new google.maps.DirectionsService();
+        const directionsRenderer = new google.maps.DirectionsRenderer();
+        directionsRenderer.setMap(map);
 
-                directionsService.route(
-                    {
-                        origin: {placeId: origin_place_id},
-                        destination: {placeId: destination_place_id},
-                        travelMode: google.maps.TravelMode.DRIVING,
-                    },
-                    (response, status) => {
-                        if (status === "OK") {
-                            directionsRenderer.setDirections(response);
+        directionsService.route(
+          {
+            origin: { placeId: origin_place_id },
+            destination: { placeId: destination_place_id },
+            travelMode: google.maps.TravelMode.DRIVING,
+          },
+          (response, status) => {
+            if (status === "OK") {
+              directionsRenderer.setDirections(response);
 
-                            const route = response.routes[0].legs[0];
+              const route = response.routes[0].legs[0];
 
-                            // console.log(route);
+              // console.log(route);
 
-                            // console.log(response);
-                            setDirectionsResponse(response);
-                            setDistance(route.distance.text);
-                            setDuration(route.duration.text);
-                            // alert(
-                            //     `Origin: ${route.start_address}\nDestination: ${route.end_address}\nDistance: ${route.distance.text}\nDuration: ${route.duration.text}`
-                            // );
-                        } else {
-                            alert("Directions request failed due to " + status);
-                            console.error(
-                                "Directions request failed",
-                                response
-                            );
-                        }
-                    }
-                );
+              // console.log(response);
+              setDirectionsResponse(response);
+              setDistance(route.distance.text);
+              setDistanceValue(route.distance.value / 1000);
+              setDuration(route.duration.text);
+              // alert(
+              //     `Origin: ${route.start_address}\nDestination: ${route.end_address}\nDistance: ${route.distance.text}\nDuration: ${route.duration.text}`
+              // );
+            } else {
+              alert("Directions request failed due to " + status);
+              console.error("Directions request failed", response);
             }
-        };
+          }
+        );
+      }
+    };
 
-        window.initMap = initMap;
-        if (window.google && window.google.maps) {
-            initMap();
-        }
-    }, [origin_place_id, destination_place_id]);
+    window.initMap = initMap;
+    if (window.google && window.google.maps) {
+      initMap();
+    }
+  }, [origin_place_id, destination_place_id]);
 
-    // const {isLoaded} = useJsApiLoader({
-    //     googleMapsApiKey: "AIzaSyDv7zbUva4oy7ni_A7sKFYTpuE7yBhlz1E",
-    // });
+  //Function to get shcema for certain cars
+  const getSchemaForCar = (carId, schema) => {
+    const schemaForCar = schema.items
+      .filter((key) => {
+        return key.car_class.id === carId;
+      })
+      .map((element) => element.base_price);
+    return schemaForCar;
+  };
 
-    // useEffect(() => {
-    //     async function fetchData() {
-    //         if (origin_place_id && destination_place_id) {
-    //             const directionsService = new google.maps.DirectionsService();
+  //Function to calculate price
+  const calculatePrice = (carId, distance, schema) => {
+    const schemaForThisCar = getSchemaForCar(carId, schema);
+    const priceSchemaForCar = schemaForThisCar.filter((key) => {
+      return distance > key.from_range_km && distance <= key.to_range_km;
+    });
 
-    //             const results = await directionsService.route({
-    //                 origin: {placeId: origin_place_id},
-    //                 destination: {placeId: destination_place_id},
-    //                 travelMode: google.maps.TravelMode.DRIVING,
-    //             });
+    if (priceSchemaForCar[0]) {
+      return (priceSchemaForCar[0].base_price * distance).toFixed(2);
+    }
+    const highestPriceForCar = Math.max(...schemaForThisCar);
+    return (highestPriceForCar * distance).toFixed(2);
+  };
 
-    //             setDirectionsResponse(results);
-    //             setDistance(results.routes[0].legs[0].distance.text);
-    //             setDuration(results.routes[0].legs[0].duration.text);
-    //         }
-    //     }
+  // const {isLoaded} = useJsApiLoader({
+  //     googleMapsApiKey: "AIzaSyDv7zbUva4oy7ni_A7sKFYTpuE7yBhlz1E",
+  // });
 
-    //     fetchData();
-    // }, [origin_place_id, destination_place_id]);
+  // useEffect(() => {
+  //     async function fetchData() {
+  //         if (origin_place_id && destination_place_id) {
+  //             const directionsService = new google.maps.DirectionsService();
 
-    const center = {lat: 13.7566, lng: 100.49914};
+  //             const results = await directionsService.route({
+  //                 origin: {placeId: origin_place_id},
+  //                 destination: {placeId: destination_place_id},
+  //                 travelMode: google.maps.TravelMode.DRIVING,
+  //             });
 
-    return (
-        <>
-            <Head>
-                <title>Limosia - Car Search</title>
-            </Head>
-            <div class="main-container pt-6 pb-8 mt-28">
-                <ul class="breadcrumb-list">
-                    <li>
-                        <a
-                            href="javascript:void(0)"
-                            class="flex flex-row items-center gap-[0.625rem]"
-                        >
-                            <img
-                                src="/assets/images/icons/material-symbols_home-rounded.svg"
-                                alt=""
-                                class="w-6"
-                            />
-                            <span>Reservation</span>
-                        </a>
-                    </li>
-                    <li>Choose Cars</li>
-                </ul>
-            </div>
-            <div class="main-container pb-20 lg:pb-32">
-                <div class="sidebar">
-                    <p class="title pb-5">ROUTE MAP</p>
+  //             setDirectionsResponse(results);
+  //             setDistance(results.routes[0].legs[0].distance.text);
+  //             setDuration(results.routes[0].legs[0].duration.text);
+  //         }
+  //     }
 
-                    <div class="w-full h-[16.625rem] pb-5">
-                        {/* <img
+  //     fetchData();
+  // }, [origin_place_id, destination_place_id]);
+
+  const center = { lat: 13.7566, lng: 100.49914 };
+
+  return (
+    <>
+      <Head>
+        <title>Limosia - Car Search</title>
+      </Head>
+      <div class="main-container pt-6 pb-8 mt-28">
+        <ul class="breadcrumb-list">
+          <li>
+            <a
+              href="javascript:void(0)"
+              class="flex flex-row items-center gap-[0.625rem]"
+            >
+              <img
+                src="/assets/images/icons/material-symbols_home-rounded.svg"
+                alt=""
+                class="w-6"
+              />
+              <span>Reservation</span>
+            </a>
+          </li>
+          <li>Choose Cars</li>
+        </ul>
+      </div>
+      <div class="main-container pb-20 lg:pb-32">
+        <div class="sidebar">
+          <p class="title pb-5">ROUTE MAP</p>
+
+          <div class="w-full h-[16.625rem] pb-5">
+            {/* <img
                             src="/assets/images/maps.jpg"
                             alt="Maps"
                             class="w-full h-full object-cover"
                         /> */}
-                        {/* <GoogleMap
+            {/* <GoogleMap
                             center={center}
                             zoom={15}
                             mapContainerStyle={{width: "100%", height: "100%"}}
@@ -148,32 +171,27 @@ const CarClass = ({carClassData}) => {
                                 />
                             )}
                         </GoogleMap> */}
-                        <div
-                            ref={mapRef}
-                            style={{width: "100%", height: "100%"}}
-                        ></div>
-                    </div>
+            <div ref={mapRef} style={{ width: "100%", height: "100%" }}></div>
+          </div>
 
-                    <div class="leading-relaxed">
-                        {/* <p>
+          <div class="leading-relaxed">
+            {/* <p>
                             From: <span class="font-bold">Airport AAA</span>
                         </p>
                         <p>
                             To: <span class="font-bold">Destination Name</span>
                         </p> */}
-                        <p>
-                            Total Range:{" "}
-                            <span class="font-bold">{distance}</span>
-                        </p>
-                        <p>
-                            Total Duration:{" "}
-                            <span class="font-bold">{duration}</span>
-                        </p>
-                    </div>
-                </div>
+            <p>
+              Total Range: <span class="font-bold">{distance}</span>
+            </p>
+            <p>
+              Total Duration: <span class="font-bold">{duration}</span>
+            </p>
+          </div>
+        </div>
 
-                <div class="main-content">
-                    {/* <form
+        <div class="main-content">
+          {/* <form
                         action="#"
                         class="flex flex-col md:flex-row max-md:gap-4 justify-between md:items-center px-4 md:px-8 py-4 mb-5 rounded-[0.625rem] box-shadow bg-gray-light"
                     >
@@ -256,47 +274,51 @@ const CarClass = ({carClassData}) => {
                         </div>
                     </form> */}
 
-                    <div class="flex flex-col gap-8">
-                        {carClassData.items.map((item, index) => {
-                            return (
-                                <>
-                                    <div class="car-card" key={item.id}>
-                                        <div class="image-wrap">
-                                            <img
-                                                src={item.image}
-                                                alt="Car"
-                                                class="max-xl:max-w-full xl:w-full h-full object-contain"
-                                            />
-                                        </div>
+          {/* // Work Here */}
+          <div class="flex flex-col gap-8">
+            {carClassData.items.map((item, index) => {
+              if (
+                Object.keys(getSchemaForCar(item.id, priceSchema)).length === 0
+              ) {
+                return;
+              }
+              return (
+                <>
+                  <div class="car-card" key={item.id}>
+                    <div class="image-wrap">
+                      <img
+                        src={item.image}
+                        alt="Car"
+                        class="max-xl:max-w-full xl:w-full h-full object-contain"
+                      />
+                    </div>
 
-                                        <div class="detail-wrap">
-                                            <p class="title">{item.name}</p>
-                                            <p class="font-bold text-gray-dark">
-                                                {item.description}
-                                            </p>
+                    <div class="detail-wrap">
+                      <p class="title">{item.name}</p>
+                      <p class="font-bold text-gray-dark">{item.description}</p>
 
-                                            <ul class="facility-list">
-                                                <li>
-                                                    <img
-                                                        src="/assets/images/icons/ic_round-people-alt.svg"
-                                                        alt="Icon"
-                                                        class="w-6"
-                                                    />
-                                                    <p class="text-sm font-bold">
-                                                        {item.max_guest} People
-                                                    </p>
-                                                </li>
-                                                <li>
-                                                    <img
-                                                        src="/assets/images/icons/fa-solid_luggage-cart.svg"
-                                                        alt="Icon"
-                                                        class="w-6"
-                                                    />
-                                                    <p class="text-sm font-bold">
-                                                        {item.max_suitcase} pcs
-                                                    </p>
-                                                </li>
-                                                {/* <li>
+                      <ul class="facility-list">
+                        <li>
+                          <img
+                            src="/assets/images/icons/ic_round-people-alt.svg"
+                            alt="Icon"
+                            class="w-6"
+                          />
+                          <p class="text-sm font-bold">
+                            {item.max_guest} People
+                          </p>
+                        </li>
+                        <li>
+                          <img
+                            src="/assets/images/icons/fa-solid_luggage-cart.svg"
+                            alt="Icon"
+                            class="w-6"
+                          />
+                          <p class="text-sm font-bold">
+                            {item.max_suitcase} pcs
+                          </p>
+                        </li>
+                        {/* <li>
                                                     <img
                                                         src="/assets/images/icons/ph_steering-wheel-fill.svg"
                                                         alt="Icon"
@@ -306,41 +328,49 @@ const CarClass = ({carClassData}) => {
                                                         AC
                                                     </p>
                                                 </li> */}
-                                            </ul>
+                      </ul>
 
-                                            <div class="flex max-sm:flex-col justify-between items-center">
-                                                <p class="text-2xl font-bold max-sm:pb-5 sm:pr-4">
-                                                    THB 706
-                                                </p>
-                                                <Link
-                                                    href={`/car-details`}
-                                                    class="btn-blue flex-shrink-0"
-                                                >
-                                                    <span>BOOK NOW</span>
-                                                </Link>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </>
-                            );
-                        })}
+                      <div class="flex max-sm:flex-col justify-between items-center">
+                        <p class="text-2xl font-bold max-sm:pb-5 sm:pr-4">
+                          {`THB ${calculatePrice(
+                            item.id,
+                            distanceValue,
+                            priceSchema
+                          )}`}
+                        </p>
+                        <Link
+                          href={`/car-details`}
+                          class="btn-blue flex-shrink-0"
+                        >
+                          <span>BOOK NOW</span>
+                        </Link>
+                      </div>
                     </div>
-                </div>
-            </div>
-        </>
-    );
+                  </div>
+                </>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </>
+  );
 };
 
 export default CarClass;
 
 export async function getServerSideProps() {
-    const carClassData = await fetch(
-        `https://phpstack-833267-3799658.cloudwaysapps.com/api/v1/car-class?page=1&limit=10&sortBy=ASC`
-    ).then((res) => res.json());
+  const carClassData = await fetch(
+    `http://localhost:3333/api/v1/car-class?page=1&limit=10&sortBy=ASC`
+  ).then((res) => res.json());
+  const priceSchema = await fetch(
+    `http://localhost:3333/api/v1/price-schema?page=1&limit=10&sortBy=ASC`
+  ).then((res) => res.json());
 
-    return {
-        props: {
-            carClassData,
-        },
-    };
+  return {
+    props: {
+      carClassData,
+      priceSchema,
+    },
+  };
 }
