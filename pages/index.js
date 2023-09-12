@@ -220,12 +220,13 @@ export default function Home({ carClassData, airportData }) {
 }
 
 export async function getServerSideProps() {
+  const apiPath = process.env.NEXT_PUBLIC_API_PATH;
   const carClassData = await fetch(
-    `https://phpstack-833267-3799658.cloudwaysapps.com/api/v1/car-class?page=1&limit=10&sortBy=ASC`
+    `${apiPath}/car-class?page=1&limit=10&sortBy=ASC`
   ).then((res) => res.json());
 
   const airportData = await fetch(
-    `https://phpstack-833267-3799658.cloudwaysapps.com/api/v1/airports?page=1&limit=9999&sortBy=ASC`
+    `${apiPath}/airports?page=1&limit=9999&sortBy=ASC`
   ).then((res) => res.json());
 
   return {
