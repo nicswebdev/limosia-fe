@@ -1,8 +1,10 @@
+import LoginModal from "@/components/LoginModal";
 import {
   DirectionsRenderer,
   GoogleMap,
   useJsApiLoader,
 } from "@react-google-maps/api";
+import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -12,6 +14,12 @@ const CarClass = ({ carClassData, priceSchema }) => {
   const mapRef = useRef(null);
   const router = useRouter();
   const { origin_place_id, destination_place_id } = router.query;
+
+  const { data: session } = useSession();
+  const [openLoginDialog, setOpenLoginDialog] = useState(false);
+  const closeLoginDialog = () => {
+    setOpenLoginDialog(false);
+  };
 
   const [directionsResponse, setDirectionsResponse] = useState(null);
   const [distance, setDistance] = useState("");
@@ -191,6 +199,7 @@ const CarClass = ({ carClassData, priceSchema }) => {
         </div>
 
         <div class="main-content">
+          {openLoginDialog && <LoginModal closeModal={closeLoginDialog} />}
           {/* <form
                         action="#"
                         class="flex flex-col md:flex-row max-md:gap-4 justify-between md:items-center px-4 md:px-8 py-4 mb-5 rounded-[0.625rem] box-shadow bg-gray-light"
@@ -274,7 +283,6 @@ const CarClass = ({ carClassData, priceSchema }) => {
                         </div>
                     </form> */}
 
-          {/* // Work Here */}
           <div class="flex flex-col gap-8">
             {carClassData.items.map((item, index) => {
               if (
@@ -338,12 +346,18 @@ const CarClass = ({ carClassData, priceSchema }) => {
                             priceSchema
                           )}`}
                         </p>
-                        <Link
-                          href={`/car-details`}
+                        <button
+                          onClick={() => {
+                            if (session) {
+                              window.location.href = "/car-details";
+                              return;
+                            }
+                            setOpenLoginDialog(true);
+                          }}
                           class="btn-blue flex-shrink-0"
                         >
                           <span>BOOK NOW</span>
-                        </Link>
+                        </button>
                       </div>
                     </div>
                   </div>
