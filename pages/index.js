@@ -7,6 +7,8 @@ import "react-multi-carousel/lib/styles.css";
 import WhyCard from "@/components/WhyCard";
 import WorksCard from "@/components/WorksCard";
 import TestimoniCard from "@/components/TestimoniCard";
+import { getServerSession } from "next-auth";
+import { authOptions } from "./api/auth/[...nextauth]";
 
 export default function Home({ carClassData, airportData }) {
   const responsive3 = {
@@ -219,7 +221,7 @@ export default function Home({ carClassData, airportData }) {
   );
 }
 
-export async function getServerSideProps() {
+export async function getServerSideProps(context) {
   const apiPath = process.env.NEXT_PUBLIC_API_PATH;
   const carClassData = await fetch(
     `${apiPath}/car-class?page=1&limit=10&sortBy=ASC`
@@ -228,6 +230,21 @@ export async function getServerSideProps() {
   const airportData = await fetch(
     `${apiPath}/airports?page=1&limit=9999&sortBy=ASC`
   ).then((res) => res.json());
+
+  // // to check if fetching the right user
+  // const session = await getServerSession(context.req, context.res, authOptions);
+  // //Check if get user data
+  // if (session) {
+  //   const res = await fetch(`${apiPath}/users/me`, {
+  //     method: "GET",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Authorization: `Bearer ${session.access_token}`,
+  //     },
+  //   });
+  //   const data = await res.json();
+  //   console.log(data);
+  // }
 
   return {
     props: {

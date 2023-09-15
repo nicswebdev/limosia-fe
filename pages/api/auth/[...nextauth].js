@@ -48,46 +48,7 @@ export const authOptions = {
     }),
   ],
   callbacks: {
-    async signIn({ profile, account }) {
-      if (account.provider === "google") {
-        const apiPath = process.env.NEXT_PUBLIC_API_PATH;
-        const res = await fetch(`${apiPath}/auth/check-email`, {
-          method: "POST",
-          body: JSON.stringify({ email: profile.email }),
-          headers: { "Content-Type": "application/json" },
-        });
-        const data = await res.json();
-        if (data.statusCode === 500) {
-          function generateRandomString(length) {
-            const characters =
-              "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-            let result = "";
-            for (let i = 0; i < length; i++) {
-              result += characters.charAt(
-                Math.floor(Math.random() * characters.length)
-              );
-            }
-            return "A" + result + "1";
-          }
-
-          const randomPass = generateRandomString(8);
-          const apiPath = process.env.NEXT_PUBLIC_API_PATH;
-          const res = await fetch(`${apiPath}/auth/register`, {
-            method: "POST",
-            body: JSON.stringify({
-              f_name: profile.given_name,
-              l_name: profile.family_name,
-              email: profile.email,
-              password: randomPass,
-            }),
-            headers: { "Content-Type": "application/json" },
-          });
-          if (!res.ok) {
-            return false;
-          }
-          return true;
-        }
-      }
+    async signIn({ profile, account, user }) {
       return true;
     },
 
@@ -95,18 +56,25 @@ export const authOptions = {
       // console.log(profile)
       if (account && user) {
         if (account.provider === "google") {
+          // const apiPath = process.env.NEXT_PUBLIC_API_PATH;
+          // const res = await fetch(`${apiPath}/auth/check-email`, {
+          //   method: "POST",
+          //   body: JSON.stringify({ email: token.email }),
+          //   headers: { "Content-Type": "application/json" },
+          // });
+          // const data = await res.json();
+          // console.log(data)
           const apiPath = process.env.NEXT_PUBLIC_API_PATH;
-          const res = await fetch(`${apiPath}/auth/check-email`, {
+          const res = await fetch(`${apiPath}/auth/google/google-login`, {
             method: "POST",
-            body: JSON.stringify({ email: token.email }),
+            body: JSON.stringify({ idToken: account.id_token }),
             headers: { "Content-Type": "application/json" },
           });
           const data = await res.json();
-          // console.log(data)
-          return { data: data };
+          return {access_token: data.access_token };
         }
         return {
-          data: user.user,
+          access_token: user.token.access_token,
           // id:user.user.email
         };
       }
@@ -114,7 +82,7 @@ export const authOptions = {
     },
 
     async session({ session, token }) {
-      session.user.data = token.data;
+      session.access_token = token.access_token;
       // console.log(session);
       return session;
     },
