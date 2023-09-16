@@ -278,9 +278,9 @@ const Register = () => {
         <div className="pt-14 flex justify-center">
           <p className="font-bold text-xl text-gray-dark">
             {`Already Have an Account?`}
-            <a href="/login" className="text-orange-dark hover:underline">
+            <Link href="/login" className="text-orange-dark hover:underline">
               Sign in
-            </a>
+            </Link>
           </p>
         </div>
       </div>

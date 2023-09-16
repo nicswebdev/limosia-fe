@@ -65,7 +65,7 @@ const Hero = ({ airportData }) => {
     );
   });
 
-  const [originAirport, setOriginAirport] = useState(null);
+  const [originAirport, setOriginAirport] = useState("");
   const [destinationHotel, setDestinationHotel] = useState(null);
   const autocompleteOriginRef = useRef(null);
   const autocompleteDestinationRef = useRef(null);
@@ -91,7 +91,7 @@ const Hero = ({ airportData }) => {
           alert("Please select an airport");
           autocompleteOriginRef.current.value = "";
         } else {
-          setOriginAirport(place);
+          // setOriginAirport(place);
         }
       });
 
@@ -127,8 +127,9 @@ const Hero = ({ airportData }) => {
 
   const handleButtonClick = () => {
     if (originAirport && destinationHotel) {
+      console.log(originAirport);
       router.push(
-        `/car-class?origin_place_id=${originAirport.place_id}&destination_place_id=${destinationHotel.place_id}`
+        `/car-class?origin_place_id=${originAirport}&destination_place_id=${destinationHotel.place_id}`
       );
     } else {
       alert("Please select both origin and destination point");
@@ -228,12 +229,33 @@ const Hero = ({ airportData }) => {
             <>
               <div className="bg-[#F6F6F6] rounded-[100px] py-2 px-5 flex flex-col">
                 <label className="karla text-[12px]">From :</label>
-                <input
+                <select
+                  onChange={(event) => {
+                    setOriginAirport(event.target.value);
+                  }}
+                  className="form-control karla font-bold text-[16px]"
+                >
+                  <option value="none" selected disabled hidden>
+                    Select Airport
+                  </option>
+                  {airportData.items.map((airport) => {
+                    return (
+                      <option
+                        value={airport.place_id}
+                        className=""
+                        key={airport.id}
+                      >
+                        {airport.name}
+                      </option>
+                    );
+                  })}
+                </select>
+                {/* <input
                   type="text"
                   placeholder="Type your airport origin"
                   ref={autocompleteOriginRef}
                   className="form-control karla font-bold text-[16px]"
-                />
+                /> */}
               </div>
               <div className="bg-[#F6F6F6] rounded-[100px] py-2 px-5 flex flex-col">
                 <label className="karla text-[12px]">To :</label>
