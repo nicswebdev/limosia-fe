@@ -8,36 +8,63 @@ import { signOut, useSession } from "next-auth/react";
 const Navbar = () => {
   const { data: session } = useSession();
   // console.log(session)
-  const links = [
-    {
-      names: "Home",
-      link: "/",
-    },
-    {
-      names: "Car Class",
-      link: "/car-class",
-    },
-    {
-      names: "About",
-      link: "/#",
-    },
-    {
-      names: "Our Client",
-      link: "/#",
-    },
-    {
-      names: "Contact",
-      link: "/#",
-    },
-    {
-      names: session ? "My Account" : "Login",
-      link: "/login",
-    },
-    {
-      names: session ? "My Account" : "Register",
-      link: "/register",
-    },
-  ];
+  const links = session
+    ? [
+        {
+          names: "Home",
+          link: "/",
+        },
+        {
+          names: "Car Class",
+          link: "/car-class",
+        },
+        {
+          names: "About",
+          link: "/#",
+        },
+        {
+          names: "Our Client",
+          link: "/#",
+        },
+        {
+          names: "Contact",
+          link: "/#",
+        },
+        {
+          names: "My Account",
+          link: "/profile",
+        },
+      ]
+    : [
+        {
+          names: "Home",
+          link: "/",
+        },
+        {
+          names: "Car Class",
+          link: "/car-class",
+        },
+        {
+          names: "About",
+          link: "/#",
+        },
+        {
+          names: "Our Client",
+          link: "/#",
+        },
+        {
+          names: "Contact",
+          link: "/#",
+        },
+        {
+          names: "Login",
+          link: "/login",
+        },
+        {
+          names: "Register",
+          link: "/register",
+        },
+      ];
 
   const [scroll, setScroll] = useState(false);
   // State to open the navbar when on mobile
@@ -92,16 +119,14 @@ const Navbar = () => {
             <BurgerButton
               onClick={() => {
                 setOpenNavbar(true);
-                document.body.classList.add('overflow-hidden');
-
+                document.body.classList.add("overflow-hidden");
               }}
             />
             <Drawer
               dialogOpen={openNavbar}
               closeDialog={() => {
                 setOpenNavbar(false);
-                document.body.classList.remove('overflow-hidden');
-
+                document.body.classList.remove("overflow-hidden");
               }}
               links={links}
             />
