@@ -24,8 +24,8 @@ const Login = () => {
 
     // Handle form submission
     onSubmit: async ({ email, password }) => {
-      if(errorFromServer.email || errorFromServer.password){
-        return
+      if (errorFromServer.email || errorFromServer.password) {
+        return;
       }
       const formData = {
         email: email,
@@ -106,7 +106,9 @@ const Login = () => {
                   <p className="ml-6 mt-1 text-red-600">{errors.email} </p>
                 ) : (
                   errorFromServer.email && (
-                    <p className="ml-6 mt-1 text-red-600">{errorFromServer.email} </p>
+                    <p className="ml-6 mt-1 text-red-600">
+                      {errorFromServer.email}{" "}
+                    </p>
                   )
                 )}
               </div>
@@ -130,7 +132,9 @@ const Login = () => {
                   <p className="ml-6 mt-1 text-red-600">{errors.password} </p>
                 ) : (
                   errorFromServer.password && (
-                    <p className="ml-6 mt-1 text-red-600">{errorFromServer.password} </p>
+                    <p className="ml-6 mt-1 text-red-600">
+                      {errorFromServer.password}{" "}
+                    </p>
                   )
                 )}
               </div>
@@ -157,19 +161,18 @@ const Login = () => {
                   const bookLink = sessionStorage.getItem("bookLink");
                   signIn("google", { callbackUrl: bookLink ? bookLink : "/" });
                 }}
-                className="btn-gray flex justify-between items-center py-3 mb-4 text-2xl"
+                className="btn-gray flex justify-between items-center py-3 mb-4 text-2xl w-full lg:mt-16"
               >
                 <img src="/assets/images/icons/devicon_google.svg" alt="Icon" />
                 <span className="mx-auto">Sign in with Google</span>
               </button>
-
-              <Link
+              {/* <Link
                 href={`/dashboard`}
                 className="btn-blue bg-[#1877F2] flex justify-between items-center py-3 text-2xl"
               >
                 <img src="/assets/images/icons/logos_facebook.svg" alt="Icon" />
                 <span className="mx-auto">Sign in with Facebook</span>
-              </Link>
+              </Link> */}
             </div>
           </div>
         </div>
