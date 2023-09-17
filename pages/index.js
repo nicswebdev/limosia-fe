@@ -231,20 +231,20 @@ export async function getServerSideProps(context) {
     `${apiPath}/airports?page=1&limit=9999&sortBy=ASC`
   ).then((res) => res.json());
 
-  // // to check if fetching the right user
-  // const session = await getServerSession(context.req, context.res, authOptions);
-  // //Check if get user data
-  // if (session) {
-  //   const res = await fetch(`${apiPath}/users/me`, {
-  //     method: "GET",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //       Authorization: `Bearer ${session.access_token}`,
-  //     },
-  //   });
-  //   const data = await res.json();
-  //   console.log(data);
-  // }
+  // to check if fetching the right user
+  const session = await getServerSession(context.req, context.res, authOptions);
+  //Check if get user data
+  if (session) {
+    const res = await fetch(`${apiPath}/users/me`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    });
+    const data = await res.json();
+    console.log(data);
+  }
 
   return {
     props: {

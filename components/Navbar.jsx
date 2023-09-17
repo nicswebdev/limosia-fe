@@ -33,6 +33,10 @@ const Navbar = () => {
       names: session ? "My Account" : "Login",
       link: "/login",
     },
+    {
+      names: session ? "My Account" : "Register",
+      link: "/register",
+    },
   ];
 
   const [scroll, setScroll] = useState(false);
@@ -88,12 +92,16 @@ const Navbar = () => {
             <BurgerButton
               onClick={() => {
                 setOpenNavbar(true);
+                document.body.classList.add('overflow-hidden');
+
               }}
             />
             <Drawer
               dialogOpen={openNavbar}
               closeDialog={() => {
                 setOpenNavbar(false);
+                document.body.classList.remove('overflow-hidden');
+
               }}
               links={links}
             />
