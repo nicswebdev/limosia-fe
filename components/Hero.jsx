@@ -8,6 +8,8 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 const Hero = ({ airportData }) => {
+  const [onDailyRental, setOnDailyRental] = useState(false);
+
   const today = new Date();
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -144,6 +146,28 @@ const Hero = ({ airportData }) => {
           className="object-cover w-full h-full"
         />
         <div className="bg-white h-auto absolute flex flex-col gap-4 right-[7%]  md:right-[5%] top-[25%] rounded-md p-4 w-[85%] md:w-[30%]">
+          <div className="flex flex-column w-full justify-center">
+            <button
+              onClick={() => {
+                setOnDailyRental(false);
+              }}
+              className={`w-1/2 ${
+                onDailyRental ? "bg-white border" : "bg-[#ED7A48] text-white"
+              } py-1 mx-1 rounded-full  text-bold karla`}
+            >
+              Booking Travel
+            </button>
+            <button
+              onClick={() => {
+                setOnDailyRental(true);
+              }}
+              className={`w-1/2 ${
+                onDailyRental ? "bg-[#ED7A48] text-white" : "bg-white border"
+              } py-1 mx-1 rounded-full text-bold karla`}
+            >
+              Daily Rental
+            </button>
+          </div>
           {/* <div className="bg-[#F6F6F6] rounded-[100px] py-2 px-5 flex flex-col">
                         <label className="karla text-[12px]">From :</label>
                         <select
@@ -161,51 +185,95 @@ const Hero = ({ airportData }) => {
                             })}
                         </select>
                     </div> */}
-          <div className="bg-[#F6F6F6] rounded-[100px] py-2 px-5 flex flex-col">
-            <label className="karla text-[12px]">From :</label>
-            <input
-              type="text"
-              placeholder="Type your airport origin"
-              ref={autocompleteOriginRef}
-              className="form-control karla font-bold text-[16px]"
-            />
-          </div>
-          <div className="bg-[#F6F6F6] rounded-[100px] py-2 px-5 flex flex-col">
-            <label className="karla text-[12px]">To :</label>
-            <input
-              type="text"
-              placeholder="Type your destination"
-              ref={autocompleteDestinationRef}
-              className="form-control karla font-bold text-[16px]"
-            />
-          </div>
-          <div className="flex flex-row justify-between gap-1 w-[100%]">
-            <div className="bg-[#F6F6F6] rounded-[100px] self-start py-2 px-5 flex flex-col w-[47%]">
-              <DatePicker
-                selected={checkin}
-                dateFormat="yyyy-MM-dd"
-                onChange={(date) => setCheckin(date)}
-                onSelect={handleDateSelect}
-                minDate={today}
-                customInput={<ArrivalCustomInput />}
-              />
-            </div>
-            <div className="bg-[#F6F6F6] rounded-[100px] self-end py-2 px-5 flex flex-col w-[47%]">
-              <label className="karla text-[12px]">Passanger :</label>
-              <select className="form-control karla font-bold text-[16px]">
-                <option value="1">1</option>
-                <option value="2" selected>
-                  2
-                </option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-                <option value="7">7</option>
-                <option value="8">8</option>
-              </select>
-            </div>
-          </div>
+
+          {onDailyRental ? (
+            <>
+              <div className="bg-[#F6F6F6] rounded-[100px] py-2 px-5 flex flex-col">
+                <label className="karla text-[12px]">Delivery Point :</label>
+                <input
+                  type="text"
+                  placeholder="Type your delivery point"
+                  className="form-control karla font-bold text-[16px]"
+                />
+              </div>
+              <div className="flex flex-row justify-between gap-1 w-[100%]">
+                <div className="bg-[#F6F6F6] rounded-[100px] self-start py-2 px-5 flex flex-col w-[47%]">
+                  <DatePicker
+                    selected={checkin}
+                    dateFormat="yyyy-MM-dd"
+                    onChange={(date) => setCheckin(date)}
+                    onSelect={handleDateSelect}
+                    minDate={today}
+                    customInput={<ArrivalCustomInput />}
+                  />
+                </div>
+                <div className="bg-[#F6F6F6] rounded-[100px] self-end py-2 px-5 flex flex-col w-[47%]">
+                  <label className="karla text-[12px]">Passanger :</label>
+                  <select className="form-control karla font-bold text-[16px]">
+                    <option value="1">1</option>
+                    <option value="2" selected>
+                      2
+                    </option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                  </select>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="bg-[#F6F6F6] rounded-[100px] py-2 px-5 flex flex-col">
+                <label className="karla text-[12px]">From :</label>
+                <input
+                  type="text"
+                  placeholder="Type your airport origin"
+                  ref={autocompleteOriginRef}
+                  className="form-control karla font-bold text-[16px]"
+                />
+              </div>
+              <div className="bg-[#F6F6F6] rounded-[100px] py-2 px-5 flex flex-col">
+                <label className="karla text-[12px]">To :</label>
+                <input
+                  type="text"
+                  placeholder="Type your destination"
+                  ref={autocompleteDestinationRef}
+                  className="form-control karla font-bold text-[16px]"
+                />
+              </div>
+              <div className="flex flex-row justify-between gap-1 w-[100%]">
+                <div className="bg-[#F6F6F6] rounded-[100px] self-start py-2 px-5 flex flex-col w-[47%]">
+                  <DatePicker
+                    selected={checkin}
+                    dateFormat="yyyy-MM-dd"
+                    onChange={(date) => setCheckin(date)}
+                    onSelect={handleDateSelect}
+                    minDate={today}
+                    customInput={<ArrivalCustomInput />}
+                  />
+                </div>
+                <div className="bg-[#F6F6F6] rounded-[100px] self-end py-2 px-5 flex flex-col w-[47%]">
+                  <label className="karla text-[12px]">Passanger :</label>
+                  <select className="form-control karla font-bold text-[16px]">
+                    <option value="1">1</option>
+                    <option value="2" selected>
+                      2
+                    </option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                  </select>
+                </div>
+              </div>
+            </>
+          )}
+
           {/* <div className="self-center text-center rounded-[100px] py-2 px-5 flex flex-col">
                         <label className="karla text-[12px]">Rate from :</label>
                         <span className="text-[24px] font-bold karla">
