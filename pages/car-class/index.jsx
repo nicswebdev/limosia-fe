@@ -84,7 +84,7 @@ const CarClass = ({ carClassData, priceSchema }) => {
   const getSchemaForCar = (carId, schema) => {
     const schemaForCar = schema.items
       .filter((key) => {
-        return key.car_class.id === carId;
+        return key.car_class.id === carId && key.airport.place_id === origin_place_id;
       })
       .map((element) => element.base_price);
     return schemaForCar;
