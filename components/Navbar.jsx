@@ -104,7 +104,7 @@ const Navbar = () => {
         <Link href="/" className="bg-[#ED7A48] px-7 py-2 ">
           <div className="relative w-[140px] h-[70px]">
             <Image
-              src={`./assets/qicco-logo.png`}
+              src={`./assets/qicco-logo-long.png`}
               alt="logo-limosia"
               fill
               className="object-contain"
