@@ -31,7 +31,8 @@ export default function Home({ carClassData, airportData }) {
   return (
     <div>
       <Head>
-        <title>Limosia</title>
+        <title>Qicco</title>
+        <link rel="icon" href="/assets/qicco-logo-icon.png" />
       </Head>
       <Hero airportData={airportData} />
       <div className="w-full flex items-center flex-col justify-center px-10 pt-[6%]">
