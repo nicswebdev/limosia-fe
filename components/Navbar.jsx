@@ -3,8 +3,11 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import Drawer from "./Drawer";
 import BurgerButton from "./BurgerButton";
+import { signOut, useSession } from "next-auth/react";
 
 const Navbar = () => {
+  const { data: session } = useSession();
+  // console.log(session)
   const links = [
     {
       names: "Home",
@@ -27,7 +30,7 @@ const Navbar = () => {
       link: "/#",
     },
     {
-      names: "My Account",
+      names: session ? "My Account" : "Login",
       link: "/login",
     },
   ];
@@ -116,6 +119,18 @@ const Navbar = () => {
                 );
               })}
           </ul>
+          {session ? (
+            <button
+              className="hidden md:flex text-[16px] karla font-bold uppercase"
+              onClick={() => {
+                signOut();
+              }}
+            >
+              Sign Out
+            </button>
+          ) : (
+            <></>
+          )}
           <div className="pr-4">
             <div className="hidden sm:group">
               <select className="rounded-xl border-2 border-[#868686] p-1">
