@@ -10,7 +10,7 @@ import TestimoniCard from "@/components/TestimoniCard";
 import { getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]";
 
-export default function Home({ carClassData, airportData }) {
+export default function Home({ carClassData, airportData, cheapestSchema }) {
   const responsive3 = {
     superLargeDesktop: {
       // the naming can be any, depends on you.
@@ -33,13 +33,13 @@ export default function Home({ carClassData, airportData }) {
   return (
     <div>
       <Head>
-        <title>Qicco</title>
+        <title>Quicoo</title>
         <link rel="icon" href="/assets/qicco-logo-icon.png" />
       </Head>
-      <Hero airportData={airportData} />
+      <Hero carClass={carClassData} airportData={airportData} cheapestSchema={cheapestSchema} />
       <div className="w-full flex items-center flex-col justify-center px-10 pt-[6%]">
         <h5 className="raleway text-[40px] font-bold text-[#FE5B02]">
-          Book A Ride with Limosia
+          Book A Ride with Quicoo
         </h5>
         <p className="karla font-bold text-[20px] text-[#868686]">
           Amco laboris nisi ut aliquip xea comod consequt duis aute irure dolor
@@ -232,25 +232,48 @@ export async function getServerSideProps(context) {
     `${apiPath}/airports?page=1&limit=9999&sortBy=ASC`
   ).then((res) => res.json());
 
-  // to check if fetching the right user
-  const session = await getServerSession(context.req, context.res, authOptions);
-  //Check if get user data
-  if (session) {
-    const res = await fetch(`${apiPath}/users/me`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session.access_token}`,
-      },
+  const schemaData = await fetch(
+    `${apiPath}/price-schema?page=1&limit=999999&sortBy=ASC`
+  ).then((res) => res.json());
+
+  const selectCheapestSchema = () => {
+    let uniqueCarClasses = {};
+    let filteredItems = [];
+
+    schemaData.items.forEach((item) => {
+      if (!uniqueCarClasses[item.car_class.name]) {
+        uniqueCarClasses[item.car_class.name] = true;
+        filteredItems.push(item);
+      }
     });
-    const data = await res.json();
-    console.log(data);
-  }
+
+    filteredItems.sort((a, b) => a.base_price - b.base_price);
+
+    let threeCheapestUniqueCarClasses = filteredItems.slice(0, 3);
+
+    return threeCheapestUniqueCarClasses;
+  };
+  const cheapestSchema = selectCheapestSchema();
+  // // to check if fetching the right user
+  // const session = await getServerSession(context.req, context.res, authOptions);
+  // //Check if get user data
+  // if (session) {
+  //   const res = await fetch(`${apiPath}/users/me`, {
+  //     method: "GET",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Authorization: `Bearer ${session.access_token}`,
+  //     },
+  //   });
+  //   const data = await res.json();
+  //   console.log(data);
+  // }
 
   return {
     props: {
       carClassData,
       airportData,
+      cheapestSchema
     },
   };
 }
