@@ -39,7 +39,7 @@ export default function Home({ carClassData, airportData, cheapestSchema }) {
       <Hero carClass={carClassData} airportData={airportData} cheapestSchema={cheapestSchema} />
       <div className="w-full flex items-center flex-col justify-center px-10 pt-[6%]">
         <h5 className="raleway text-[40px] font-bold text-[#FE5B02]">
-          Book A Ride with Quicoo
+          Book A Ride with Quicco
         </h5>
         <p className="karla font-bold text-[20px] text-[#868686]">
           Amco laboris nisi ut aliquip xea comod consequt duis aute irure dolor
@@ -47,7 +47,7 @@ export default function Home({ carClassData, airportData, cheapestSchema }) {
         </p>
         <div className="w-[10%] border-solid border-[1.5px] border-[#868686] mt-7"></div>
       </div>
-      <div className="w-full">
+      <div className="w-full md:mb-24">
         <Carousel
           responsive={responsive3}
           infinite={true}
@@ -106,30 +106,30 @@ export default function Home({ carClassData, airportData, cheapestSchema }) {
         </p>
         <div className="w-[10%] border-solid border-[1.5px] border-[#868686] mt-7"></div>
         <div className="flex py-10 px-0 mt-24 md:flex-row flex-col">
-          <div className="mb-32 sm:mb-60 sm:mt-10 md:mt-10 lg:mt-0">
+          <div className="mb-32 sm:mb-60 lg:mb-0 sm:mt-10 md:mt-10 lg:mt-0">
             <WorksCard
               image={`/assets/icon-destination.png`}
               title={`Pick Destination`}
             />
           </div>
 
-          <div className="mb-32 sm:mb-60">
+          <div className="mb-32 sm:mb-60 lg:mb-0">
             <WorksCard
               image={`/assets/icon-calendar.png`}
               title={`Pick a Date`}
             />
           </div>
 
-          <div className="mb-32 sm:mb-60">
+          <div className="mb-32 sm:mb-60 lg:mb-0">
             <WorksCard
               image={`/assets/icon-car.png`}
               title={`Select Car Class`}
             />
           </div>
-          <div className="mb-32 sm:mb-60">
+          <div className="mb-32 sm:mb-60 lg:mb-0">
             <WorksCard image={`/assets/icon-pay.png`} title={`Book & Pay`} />
           </div>
-          <div className="mb-10 sm:mb-24">
+          <div className="mb-10 sm:mb-24 lg:mb-0">
             <WorksCard
               image={`/assets/icon-enjoy.png`}
               title={`Enjoy Your Ride`}
@@ -254,6 +254,7 @@ export async function getServerSideProps(context) {
     return threeCheapestUniqueCarClasses;
   };
   const cheapestSchema = selectCheapestSchema();
+  console.log(cheapestSchema)
   // // to check if fetching the right user
   // const session = await getServerSession(context.req, context.res, authOptions);
   // //Check if get user data
