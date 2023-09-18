@@ -47,6 +47,11 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
     passenger: "",
   });
 
+  const [dayRentalData, setDayRentalData] = useState({
+    from: "",
+    to: "",
+  });
+
   const today = new Date();
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -108,6 +113,8 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
   const autocompleteDestinationRef = useRef(null);
   const router = useRouter();
 
+  const autoCompleteDayRentalOriginRef = useRef(null);
+
   useEffect(() => {
     const initAutocomplete = () => {
       const autocompleteOrigin = new window.google.maps.places.Autocomplete(
@@ -118,7 +125,6 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
           componentRestrictions: { country: "th" },
         }
       );
-
       // autocompleteOrigin.setTypes(["lodging"]);
       autocompleteOrigin.addListener("place_changed", () => {
         const place = autocompleteOrigin.getPlace();
@@ -144,7 +150,6 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
             componentRestrictions: { country: "th" },
           }
         );
-
       // autocompleteDestination.setTypes(["lodging"]);
       autocompleteDestination.addListener("place_changed", () => {
         const place = autocompleteDestination.getPlace();
@@ -155,6 +160,30 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
         } else {
           // setDestinationHotel(place);
           setAirportPickupData((prev) => ({
+            ...prev,
+            to: place,
+          }));
+        }
+      });
+      const autocompleteOriginDayRental =
+        new window.google.maps.places.Autocomplete(
+          autoCompleteDayRentalOriginRef.current,
+          {
+            types: ["lodging"],
+            fields: ["name", "place_id", "types"],
+            componentRestrictions: { country: "th" },
+          }
+        );
+      // autocompleteDestination.setTypes(["lodging"]);
+      autocompleteOriginDayRental.addListener("place_changed", () => {
+        const place = autocompleteOriginDayRental.getPlace();
+        // console.log(place);
+        if (place && place.types.indexOf("lodging") === -1) {
+          alert("Please select a hotel");
+          autoCompleteDayRentalOriginRef.current.value = "";
+        } else {
+          // setDestinationHotel(place);
+          setDayRentalData((prev) => ({
             ...prev,
             to: place,
           }));
@@ -247,7 +276,15 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
 
           {/* THE FORM IS HERE */}
           <div className="bg-white h-auto rounded-md p-4">
-            <div className="flex py-1 px-1 w-full  mb-3 bg-[#F6F6F6] rounded-full">
+            {/* tab of airport feature */}
+            <div
+              hidden={!mainTab.airportTransfer}
+              className={`${
+                mainTab.airportTransfer
+                  ? "flex py-1 px-1 w-full  mb-3 bg-[#F6F6F6] rounded-full"
+                  : ""
+              }`}
+            >
               <button
                 onClick={() => {
                   changeAirportTabTo("pickup");
@@ -427,7 +464,7 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
                   <label className="karla text-[12px]">Delivery Point :</label>
                   <input
                     type="text"
-                    ref={autocompleteOriginRef}
+                    ref={autoCompleteDayRentalOriginRef}
                     placeholder="Type your delivery point"
                     className="form-control karla font-bold text-[16px]"
                   />
@@ -476,7 +513,12 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
                       <h1 className="text-[12px] text-center">
                         {value.tier_name} from:
                       </h1>
-                      <p className="text-center">THB {new Intl.NumberFormat("en-US").format(value.base_price)}</p>
+                      <p className="text-center">
+                        THB{" "}
+                        {new Intl.NumberFormat("en-US").format(
+                          value.base_price
+                        )}
+                      </p>
                     </div>
                   );
                 })}
