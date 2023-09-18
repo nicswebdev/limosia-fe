@@ -84,7 +84,9 @@ const CarClass = ({ carClassData, priceSchema }) => {
   const getSchemaForCar = (carId, schema) => {
     const schemaForCar = schema.items
       .filter((key) => {
-        return key.car_class.id === carId && key.airport.place_id === origin_place_id;
+        return (
+          key.car_class.id === carId && key.airport.place_id === origin_place_id
+        );
       })
       .map((element) => element.base_price);
     return schemaForCar;
@@ -98,10 +100,10 @@ const CarClass = ({ carClassData, priceSchema }) => {
     });
 
     if (priceSchemaForCar[0]) {
-      return (priceSchemaForCar[0].base_price * distance).toFixed(2);
+      return priceSchemaForCar[0].base_price;
     }
     const highestPriceForCar = Math.max(...schemaForThisCar);
-    return (highestPriceForCar * distance).toFixed(2);
+    return highestPriceForCar;
   };
 
   // const {isLoaded} = useJsApiLoader({
@@ -341,10 +343,8 @@ const CarClass = ({ carClassData, priceSchema }) => {
 
                       <div class="flex max-sm:flex-col justify-between items-center">
                         <p class="text-2xl font-bold max-sm:pb-5 sm:pr-4">
-                          {`THB ${calculatePrice(
-                            item.id,
-                            distanceValue,
-                            priceSchema
+                          {`THB ${new Intl.NumberFormat("en-US").format(
+                            calculatePrice(item.id, distanceValue, priceSchema)
                           )}`}
                         </p>
                         <button
@@ -380,7 +380,7 @@ export async function getServerSideProps() {
     `${apiPath}/car-class?page=1&limit=10&sortBy=ASC`
   ).then((res) => res.json());
   const priceSchema = await fetch(
-    `${apiPath}/price-schema?page=1&limit=10&sortBy=ASC`
+    `${apiPath}/price-schema?page=1&limit=9999999&sortBy=ASC`
   ).then((res) => res.json());
 
   return {
