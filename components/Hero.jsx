@@ -472,7 +472,7 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
               {cheapestSchema &&
                 cheapestSchema.map((value) => {
                   return (
-                    <div className="karla  font-bold">
+                    <div key={value.id} className="karla  font-bold">
                       <h1 className="text-[12px] text-center">
                         {value.tier_name} from:
                       </h1>
