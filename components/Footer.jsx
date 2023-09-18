@@ -73,14 +73,14 @@ const Footer = () => {
       <div className="w-full px-[80px] border-t border-solid border-[#868686] py-6 h-auto flex sm:justify-between items-center sm:flex-row flex-col bg-black">
         <div className="relative w-[20vw] h-[5vh] sm:self-start xs:self-center">
           <Image
-            src="/assets/quicco-logo-white.png"
+            src="/assets/quicco-logo-transparent.png"
             alt="logo"
             fill
             className="object-contain"
           />
         </div>
         <div className="karla text-[#868686] text-[12px]">
-          <p>Copyright © 2023 Quicoo, All rights reserved.</p>
+          <p>Copyright © 2023 Quicco, All rights reserved.</p>
         </div>
       </div>
     </>

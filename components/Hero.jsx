@@ -222,7 +222,7 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
     if (airportDropoffData.from && airportDropoffData.to) {
       console.log(airportDropoffData.from);
       router.push(
-        `/car-class?origin_place_id=${airportDropoffData.to}&destination_place_id=${airportDropoffData.from.place_id}`
+        `/car-class?origin_place_id=${airportDropoffData.from.place_id}&destination_place_id=${airportDropoffData.to}`
       );
     } else {
       alert("Please select both origin and destination point");
@@ -505,13 +505,13 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
             >
               BOOK NOW
             </button>
-            <div className="flex justify-center gap-2 mt-3">
+            <div className="flex justify-center gap-10 mt-3">
               {cheapestSchema &&
                 cheapestSchema.map((value) => {
                   return (
                     <div key={value.id} className="karla  font-bold">
                       <h1 className="text-[12px] text-center">
-                        {value.tier_name} from:
+                        {value.car_class.name} from:
                       </h1>
                       <p className="text-center">
                         THB{" "}

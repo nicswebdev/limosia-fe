@@ -15,10 +15,6 @@ const Navbar = () => {
           link: "/",
         },
         {
-          names: "Car Class",
-          link: "/car-class",
-        },
-        {
           names: "About",
           link: "/#",
         },
@@ -39,10 +35,6 @@ const Navbar = () => {
         {
           names: "Home",
           link: "/",
-        },
-        {
-          names: "Car Class",
-          link: "/car-class",
         },
         {
           names: "About",
@@ -151,19 +143,22 @@ const Navbar = () => {
                   </>
                 );
               })}
+            <li>
+              {session ? (
+                <button
+                  className="hidden md:flex text-[16px] karla font-bold uppercase"
+                  onClick={() => {
+                    signOut();
+                  }}
+                >
+                  Sign Out
+                </button>
+              ) : (
+                <></>
+              )}
+            </li>
           </ul>
-          {session ? (
-            <button
-              className="hidden md:flex text-[16px] karla font-bold uppercase"
-              onClick={() => {
-                signOut();
-              }}
-            >
-              Sign Out
-            </button>
-          ) : (
-            <></>
-          )}
+
           <div className="pr-4">
             <div className="hidden sm:group">
               <select className="rounded-xl border-2 border-[#868686] p-1">
