@@ -13,7 +13,7 @@ import React, { useEffect, useRef, useState } from "react";
 const CarClass = ({ carClassData, priceSchema }) => {
   const mapRef = useRef(null);
   const router = useRouter();
-  const { origin_place_id, destination_place_id } = router.query;
+  const { origin_place_id, destination_place_id, date, bookingtype } = router.query;
 
   const { data: session } = useSession();
   const [openLoginDialog, setOpenLoginDialog] = useState(false);
@@ -22,7 +22,7 @@ const CarClass = ({ carClassData, priceSchema }) => {
   };
 
   const [directionsResponse, setDirectionsResponse] = useState(null);
-  const [distance, setDistance] = useState("");
+  const [distance, setDistance] = useState(0);
   const [duration, setDuration] = useState("");
   const [distanceValue, setDistanceValue] = useState(0);
 
@@ -82,28 +82,81 @@ const CarClass = ({ carClassData, priceSchema }) => {
 
   //Function to get shcema for certain cars
   const getSchemaForCar = (carId, schema) => {
+    // console.log(distance)
     const schemaForCar = schema.items
       .filter((key) => {
         return (
-          key.car_class.id === carId && (key.airport.place_id === origin_place_id || key.airport.place_id === destination_place_id)
+          key.car_class.id === carId &&
+          (key.airport.place_id === origin_place_id ||
+            key.airport.place_id === destination_place_id) &&
+          distanceValue > key.from_range_km &&
+          distanceValue <= key.to_range_km
         );
       })
-      .map((element) => element.base_price);
+      .map((element) => element);
+    console.log(schemaForCar);
     return schemaForCar;
   };
 
+  function getBasePrice(carClassId) {
+    let place_id = ''
+    if(bookingtype === 'pickup'){
+      place_id = origin_place_id
+    }else{
+      place_id = destination_place_id
+    }
+    // Step 1: Filter items based on place_id and car_class id
+    const filteredItems = priceSchema.items.filter(
+      (item) =>
+        item.airport.place_id === place_id &&
+        item.car_class.id === carClassId
+    );
+
+    // Step 2: Find an item where distance is between from_range_km and to_range_km
+    let basePriceItem = filteredItems.find(
+      (item) =>
+        distanceValue >= item.from_range_km && distanceValue <= item.to_range_km
+    );
+
+    // Step 3: If no item found in step 2, find the item with the highest to_range_km
+    if (!basePriceItem) {
+      basePriceItem = filteredItems.reduce(
+        (prev, current) => {
+          return prev.to_range_km > current.to_range_km ? prev : current;
+        },
+        { to_range_km: -1 }
+      ); // Initialize with -1 to handle empty filteredItems case
+    }
+
+    console.log(basePriceItem);
+    if (filteredItems.length === 0) {
+      return null;
+    }
+    // Return the entire object
+    return basePriceItem;
+  }
+
   //Function to calculate price
   const calculatePrice = (carId, distance, schema) => {
-    const schemaForThisCar = getSchemaForCar(carId, schema);
-    const priceSchemaForCar = schemaForThisCar.filter((key) => {
-      return distance > key.from_range_km && distance <= key.to_range_km;
-    });
+    const schemaIdForThisCar = getSchemaForCar(carId, schema).map(
+      (element) => element.id
+    );
+    const schemaForThisCar = getSchemaForCar(carId, schema).map(
+      (element) => element.base_price
+    );
+    // // console.log(schemaForThisCar)
+    // const priceSchemaForCar = schemaForThisCar.filter((key) => {
+    //   return distance > key.from_range_km && distance <= key.to_range_km;
+    // });
 
-    if (priceSchemaForCar[0]) {
-      return priceSchemaForCar[0].base_price;
-    }
+    // if (priceSchemaForCar[0]) {
+    //   return priceSchemaForCar[0].base_price;
+    // }
     const highestPriceForCar = Math.max(...schemaForThisCar);
-    return highestPriceForCar;
+    return {
+      highestPriceForCar: schemaForThisCar,
+      schemaId: schemaIdForThisCar,
+    };
   };
 
   // const {isLoaded} = useJsApiLoader({
@@ -135,7 +188,7 @@ const CarClass = ({ carClassData, priceSchema }) => {
   return (
     <>
       <Head>
-        <title>Limosia - Car Search</title>
+        <title>Quicco - Car Search</title>
       </Head>
       <div class="main-container pt-6 pb-8 mt-28">
         <ul class="breadcrumb-list">
@@ -288,11 +341,15 @@ const CarClass = ({ carClassData, priceSchema }) => {
           {/* // Work Here */}
           <div class="flex flex-col gap-8">
             {carClassData.items.map((item, index) => {
-              if (
-                Object.keys(getSchemaForCar(item.id, priceSchema)).length === 0
-              ) {
-                return;
+              const calculateResult = getBasePrice(item.id);
+              if(calculateResult === null){
+                return
               }
+              // if (
+              //   Object.keys(getSchemaForCar(item.id, priceSchema)).length === 0
+              // ) {
+              //   return;
+              // }
               return (
                 <>
                   <div class="car-card" key={item.id}>
@@ -344,13 +401,13 @@ const CarClass = ({ carClassData, priceSchema }) => {
                       <div class="flex max-sm:flex-col justify-between items-center">
                         <p class="text-2xl font-bold max-sm:pb-5 sm:pr-4">
                           {`THB ${new Intl.NumberFormat("en-US").format(
-                            calculatePrice(item.id, distanceValue, priceSchema)
+                            calculateResult.base_price
                           )}`}
                         </p>
                         <button
                           onClick={() => {
                             if (session) {
-                              window.location.href = "/car-details";
+                              window.location.href = `/car-details?origin=${bookingtype === 'pickup'?origin_place_id:destination_place_id}&destination=${bookingtype === 'pickup'?destination_place_id:origin_place_id}&car_class_id=${item.id}&date=${date}&schemaid=${calculateResult.id}&bookingtype=${bookingtype}&range=${distance}`;
                               return;
                             }
                             setOpenLoginDialog(true);

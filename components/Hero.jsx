@@ -27,6 +27,8 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
     pickup: true,
     dropoff: false,
   });
+
+  const [airportType, setAirportType] = useState('pickup')
   //To change airport tab
   const changeAirportTabTo = (tab) => {
     setAirportTab((prev) => ({
@@ -212,7 +214,7 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
     if (airportPickupData.from && airportPickupData.to) {
       console.log(airportPickupData.from);
       router.push(
-        `/car-class?origin_place_id=${airportPickupData.from}&destination_place_id=${airportPickupData.to.place_id}`
+        `/car-class?origin_place_id=${airportPickupData.from}&destination_place_id=${airportPickupData.to.place_id}&date=${checkin}&bookingtype=${airportType}`
       );
     } else {
       alert("Please select both origin and destination point");
@@ -222,7 +224,7 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
     if (airportDropoffData.from && airportDropoffData.to) {
       console.log(airportDropoffData.from);
       router.push(
-        `/car-class?origin_place_id=${airportDropoffData.from.place_id}&destination_place_id=${airportDropoffData.to}`
+        `/car-class?origin_place_id=${airportDropoffData.from.place_id}&destination_place_id=${airportDropoffData.to}&bookingtype=${airportType}`
       );
     } else {
       alert("Please select both origin and destination point");
@@ -288,6 +290,7 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
               <button
                 onClick={() => {
                   changeAirportTabTo("pickup");
+                  setAirportType('pickup')
                 }}
                 className={`w-1/2 ${
                   airportTab.pickup ? "bg-[#ED7A48] text-white" : ""
@@ -298,6 +301,7 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
               <button
                 onClick={() => {
                   changeAirportTabTo("dropoff");
+                  setAirportType('dropoff')
                 }}
                 className={`w-1/2 ${
                   airportTab.dropoff ? "bg-[#ED7A48] text-white" : ""

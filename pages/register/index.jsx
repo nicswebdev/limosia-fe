@@ -113,7 +113,7 @@ const Register = () => {
   return (
     <>
       <Head>
-        <title>Limosia - Register</title>
+        <title>Quicco - Register</title>
       </Head>
       <div className="main-container xl:max-w-[1064px] flex-col pt-16 pb-20 lg:pb-32 [&>*]:w-full mt-20">
         <div className="text-center pb-12">
