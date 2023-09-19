@@ -2,6 +2,7 @@ import React from "react";
 
 const LoginModal = (props) => {
   const closeModal = props.closeModal;
+  const destinationLink = props.destinationLink;
   return (
     <div className="flex justify-center items-center overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none">
       <div className="relative w-auto my-6 mx-auto max-w-3xl">
@@ -23,7 +24,7 @@ const LoginModal = (props) => {
             <button
               className="mb-5 bg-[#ED7A48] rounded w-1/2 py-1"
               onClick={() => {
-                sessionStorage.setItem('bookLink','/car-details')
+                sessionStorage.setItem("bookLink", destinationLink);
                 window.location.href = "/login";
               }}
             >

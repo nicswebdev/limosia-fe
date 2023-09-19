@@ -13,7 +13,8 @@ import React, { useEffect, useRef, useState } from "react";
 const CarClass = ({ carClassData, priceSchema }) => {
   const mapRef = useRef(null);
   const router = useRouter();
-  const { origin_place_id, destination_place_id, date, bookingtype } = router.query;
+  const { origin_place_id, destination_place_id, date, bookingtype } =
+    router.query;
 
   const { data: session } = useSession();
   const [openLoginDialog, setOpenLoginDialog] = useState(false);
@@ -25,7 +26,7 @@ const CarClass = ({ carClassData, priceSchema }) => {
   const [distance, setDistance] = useState(0);
   const [duration, setDuration] = useState("");
   const [distanceValue, setDistanceValue] = useState(0);
-
+  const [destinationLink, setDestinationLink] = useState("");
   useEffect(() => {
     const initMap = () => {
       if (origin_place_id && destination_place_id) {
@@ -99,17 +100,16 @@ const CarClass = ({ carClassData, priceSchema }) => {
   };
 
   function getBasePrice(carClassId) {
-    let place_id = ''
-    if(bookingtype === 'pickup'){
-      place_id = origin_place_id
-    }else{
-      place_id = destination_place_id
+    let place_id = "";
+    if (bookingtype === "pickup") {
+      place_id = origin_place_id;
+    } else {
+      place_id = destination_place_id;
     }
     // Step 1: Filter items based on place_id and car_class id
     const filteredItems = priceSchema.items.filter(
       (item) =>
-        item.airport.place_id === place_id &&
-        item.car_class.id === carClassId
+        item.airport.place_id === place_id && item.car_class.id === carClassId
     );
 
     // Step 2: Find an item where distance is between from_range_km and to_range_km
@@ -254,7 +254,12 @@ const CarClass = ({ carClassData, priceSchema }) => {
         </div>
 
         <div class="main-content">
-          {openLoginDialog && <LoginModal closeModal={closeLoginDialog} />}
+          {openLoginDialog && (
+            <LoginModal
+              destinationLink={destinationLink}
+              closeModal={closeLoginDialog}
+            />
+          )}
           {/* <form
                         action="#"
                         class="flex flex-col md:flex-row max-md:gap-4 justify-between md:items-center px-4 md:px-8 py-4 mb-5 rounded-[0.625rem] box-shadow bg-gray-light"
@@ -342,8 +347,8 @@ const CarClass = ({ carClassData, priceSchema }) => {
           <div class="flex flex-col gap-8">
             {carClassData.items.map((item, index) => {
               const calculateResult = getBasePrice(item.id);
-              if(calculateResult === null){
-                return
+              if (calculateResult === null) {
+                return;
               }
               // if (
               //   Object.keys(getSchemaForCar(item.id, priceSchema)).length === 0
@@ -407,9 +412,32 @@ const CarClass = ({ carClassData, priceSchema }) => {
                         <button
                           onClick={() => {
                             if (session) {
-                              window.location.href = `/car-details?origin=${bookingtype === 'pickup'?origin_place_id:destination_place_id}&destination=${bookingtype === 'pickup'?destination_place_id:origin_place_id}&car_class_id=${item.id}&date=${date}&schemaid=${calculateResult.id}&bookingtype=${bookingtype}&range=${distance}`;
+                              window.location.href = `/car-details?origin=${
+                                bookingtype === "pickup"
+                                  ? origin_place_id
+                                  : destination_place_id
+                              }&destination=${
+                                bookingtype === "pickup"
+                                  ? destination_place_id
+                                  : origin_place_id
+                              }&car_class_id=${item.id}&date=${date}&schemaid=${
+                                calculateResult.id
+                              }&bookingtype=${bookingtype}&range=${distance}`;
                               return;
                             }
+                            setDestinationLink(
+                              `/car-details?origin=${
+                                bookingtype === "pickup"
+                                  ? origin_place_id
+                                  : destination_place_id
+                              }&destination=${
+                                bookingtype === "pickup"
+                                  ? destination_place_id
+                                  : origin_place_id
+                              }&car_class_id=${item.id}&date=${date}&schemaid=${
+                                calculateResult.id
+                              }&bookingtype=${bookingtype}&range=${distance}`
+                            );
                             setOpenLoginDialog(true);
                           }}
                           class="btn-blue flex-shrink-0"
