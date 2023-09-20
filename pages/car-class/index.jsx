@@ -13,8 +13,10 @@ import React, { useEffect, useRef, useState } from "react";
 const CarClass = ({ carClassData, priceSchema }) => {
   const mapRef = useRef(null);
   const router = useRouter();
-  const { origin_place_id, destination_place_id, date, bookingtype } =
-    router.query;
+  // const { origin_place_id, destination_place_id, date, bookingtype } =
+  //   router.query;
+
+  const { airport_place_id, hotel_place_id, booking_type, date } = router.query;
 
   const { data: session } = useSession();
   const [openLoginDialog, setOpenLoginDialog] = useState(false);
@@ -22,14 +24,24 @@ const CarClass = ({ carClassData, priceSchema }) => {
     setOpenLoginDialog(false);
   };
 
-  const [directionsResponse, setDirectionsResponse] = useState(null);
   const [distance, setDistance] = useState(0);
   const [duration, setDuration] = useState("");
   const [distanceValue, setDistanceValue] = useState(0);
   const [destinationLink, setDestinationLink] = useState("");
+
   useEffect(() => {
     const initMap = () => {
-      if (origin_place_id && destination_place_id) {
+      let origin = "";
+      let destination = "";
+      if (booking_type === "airportpickup") {
+        origin = airport_place_id;
+        destination = hotel_place_id;
+      }
+      if (booking_type === "airportdropoff") {
+        origin = hotel_place_id;
+        destination = airport_place_id;
+      }
+      if (airport_place_id && hotel_place_id) {
         const map = new google.maps.Map(mapRef.current, {
           zoom: 15,
           center: { lat: 13.7566, lng: 100.49914 },
@@ -43,23 +55,21 @@ const CarClass = ({ carClassData, priceSchema }) => {
         const directionsService = new google.maps.DirectionsService();
         const directionsRenderer = new google.maps.DirectionsRenderer();
         directionsRenderer.setMap(map);
-
+        //If the booking type is airport pickup set the routes
         directionsService.route(
           {
-            origin: { placeId: origin_place_id },
-            destination: { placeId: destination_place_id },
+            origin: { placeId: origin },
+            destination: { placeId: destination },
             travelMode: google.maps.TravelMode.DRIVING,
           },
           (response, status) => {
             if (status === "OK") {
               directionsRenderer.setDirections(response);
-
               const route = response.routes[0].legs[0];
 
               // console.log(route);
 
               // console.log(response);
-              setDirectionsResponse(response);
               setDistance(route.distance.text);
               setDistanceValue(route.distance.value / 1000);
               setDuration(route.duration.text);
@@ -74,38 +84,16 @@ const CarClass = ({ carClassData, priceSchema }) => {
         );
       }
     };
-
     window.initMap = initMap;
     if (window.google && window.google.maps) {
       initMap();
     }
-  }, [origin_place_id, destination_place_id]);
+  }, []);
 
-  //Function to get shcema for certain cars
-  const getSchemaForCar = (carId, schema) => {
-    // console.log(distance)
-    const schemaForCar = schema.items
-      .filter((key) => {
-        return (
-          key.car_class.id === carId &&
-          (key.airport.place_id === origin_place_id ||
-            key.airport.place_id === destination_place_id) &&
-          distanceValue > key.from_range_km &&
-          distanceValue <= key.to_range_km
-        );
-      })
-      .map((element) => element);
-    console.log(schemaForCar);
-    return schemaForCar;
-  };
-
+  //Function to get the corresponding price schema based on the terms
   function getBasePrice(carClassId) {
-    let place_id = "";
-    if (bookingtype === "pickup") {
-      place_id = origin_place_id;
-    } else {
-      place_id = destination_place_id;
-    }
+    const place_id = airport_place_id;
+
     // Step 1: Filter items based on place_id and car_class id
     const filteredItems = priceSchema.items.filter(
       (item) =>
@@ -127,37 +115,13 @@ const CarClass = ({ carClassData, priceSchema }) => {
         { to_range_km: -1 }
       ); // Initialize with -1 to handle empty filteredItems case
     }
-
-    console.log(basePriceItem);
     if (filteredItems.length === 0) {
       return null;
     }
+    // console.log(basePriceItem);
     // Return the entire object
     return basePriceItem;
   }
-
-  //Function to calculate price
-  const calculatePrice = (carId, distance, schema) => {
-    const schemaIdForThisCar = getSchemaForCar(carId, schema).map(
-      (element) => element.id
-    );
-    const schemaForThisCar = getSchemaForCar(carId, schema).map(
-      (element) => element.base_price
-    );
-    // // console.log(schemaForThisCar)
-    // const priceSchemaForCar = schemaForThisCar.filter((key) => {
-    //   return distance > key.from_range_km && distance <= key.to_range_km;
-    // });
-
-    // if (priceSchemaForCar[0]) {
-    //   return priceSchemaForCar[0].base_price;
-    // }
-    const highestPriceForCar = Math.max(...schemaForThisCar);
-    return {
-      highestPriceForCar: schemaForThisCar,
-      schemaId: schemaIdForThisCar,
-    };
-  };
 
   // const {isLoaded} = useJsApiLoader({
   //     googleMapsApiKey: "AIzaSyDv7zbUva4oy7ni_A7sKFYTpuE7yBhlz1E",
@@ -183,7 +147,7 @@ const CarClass = ({ carClassData, priceSchema }) => {
   //     fetchData();
   // }, [origin_place_id, destination_place_id]);
 
-  const center = { lat: 13.7566, lng: 100.49914 };
+  // const center = { lat: 13.7566, lng: 100.49914 };
 
   return (
     <>
@@ -213,37 +177,10 @@ const CarClass = ({ carClassData, priceSchema }) => {
           <p class="title pb-5">ROUTE MAP</p>
 
           <div class="w-full h-[16.625rem] pb-5">
-            {/* <img
-                            src="/assets/images/maps.jpg"
-                            alt="Maps"
-                            class="w-full h-full object-cover"
-                        /> */}
-            {/* <GoogleMap
-                            center={center}
-                            zoom={15}
-                            mapContainerStyle={{width: "100%", height: "100%"}}
-                            options={{
-                                zoomControl: false,
-                                streetViewControl: false,
-                                mapTypeControl: false,
-                            }}
-                        >
-                            {directionsResponse && (
-                                <DirectionsRenderer
-                                    directions={directionsResponse}
-                                />
-                            )}
-                        </GoogleMap> */}
             <div ref={mapRef} style={{ width: "100%", height: "100%" }}></div>
           </div>
 
           <div class="leading-relaxed">
-            {/* <p>
-                            From: <span class="font-bold">Airport AAA</span>
-                        </p>
-                        <p>
-                            To: <span class="font-bold">Destination Name</span>
-                        </p> */}
             <p>
               Total Range: <span class="font-bold">{distance}</span>
             </p>
@@ -260,103 +197,19 @@ const CarClass = ({ carClassData, priceSchema }) => {
               closeModal={closeLoginDialog}
             />
           )}
-          {/* <form
-                        action="#"
-                        class="flex flex-col md:flex-row max-md:gap-4 justify-between md:items-center px-4 md:px-8 py-4 mb-5 rounded-[0.625rem] box-shadow bg-gray-light"
-                    >
-                        <div class="flex gap-5 items-center">
-                            <img
-                                src="/assets/images/icons/icon-park-outline_to-bottom.svg"
-                                alt="Icon"
-                                class="w-6"
-                            />
-                            <div class="flex flex-col flex-shrink-0 gap-[0.375rem]">
-                                <label
-                                    for="airport"
-                                    class="text-xs font-bold leading-none"
-                                >
-                                    FROM AIRPORT
-                                </label>
-                                <select
-                                    id="airport"
-                                    class="appearance-none bg-transparent text-xs leading-none text-gray-dark"
-                                >
-                                    <option>airport name</option>
-                                    <option>Airport 1</option>
-                                    <option>Airport 2</option>
-                                    <option>Airport 3</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="flex gap-5 items-center">
-                            <img
-                                src="/assets/images/icons/icon-park-outline_to-bottom.svg"
-                                alt="Icon"
-                                class="w-6 rotate-180"
-                            />
-                            <div class="flex flex-col flex-shrink-0 gap-[0.375rem]">
-                                <label
-                                    for="destination"
-                                    class="text-xs font-bold leading-none"
-                                >
-                                    DESTINATION
-                                </label>
-                                <select
-                                    id="destination"
-                                    class="appearance-none bg-transparent text-xs leading-none text-gray-dark"
-                                >
-                                    <option>destination name</option>
-                                    <option>Destination 1</option>
-                                    <option>Destination 2</option>
-                                    <option>Destination 3</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="flex gap-5 items-center">
-                            <img
-                                src="/assets/images/icons/uiw_date.svg"
-                                alt="Icon"
-                                class="w-6 px-[0.125rem]"
-                            />
-                            <div class="flex flex-col flex-shrink-0 gap-[0.375rem]">
-                                <label
-                                    for="date"
-                                    class="text-xs font-bold leading-none"
-                                >
-                                    DATE
-                                </label>
-                                <input
-                                    id="date"
-                                    type="text"
-                                    placeholder="23/05/23 | 15:30 - 09:00"
-                                    class="appearance-none bg-transparent text-xs leading-none text-gray-dark"
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <button class="text-xs font-bold leading-none text-orange-light">
-                                CHANGE BOOKING DATE
-                            </button>
-                        </div>
-                    </form> */}
-
           {/* // Work Here */}
           <div class="flex flex-col gap-8">
             {carClassData.items.map((item, index) => {
-              const calculateResult = getBasePrice(item.id);
-              if (calculateResult === null) {
+              //Get the relevant schema for car class, airport, and range
+              const relevantSchema = getBasePrice(item.id);
+              //if no relevant schema for this car class return
+              if (relevantSchema === null) {
                 return;
               }
-              // if (
-              //   Object.keys(getSchemaForCar(item.id, priceSchema)).length === 0
-              // ) {
-              //   return;
-              // }
+              //otherwise print all car class
               return (
                 <>
+                  {/* Car Image */}
                   <div class="car-card" key={item.id}>
                     <div class="image-wrap">
                       <img
@@ -365,12 +218,15 @@ const CarClass = ({ carClassData, priceSchema }) => {
                         class="max-xl:max-w-full xl:w-full h-full object-contain"
                       />
                     </div>
-
+                    {/* Car Details */}
                     <div class="detail-wrap">
+                      {/* Car Name */}
                       <p class="title">{item.name}</p>
+                      {/* Car Description */}
                       <p class="font-bold text-gray-dark">{item.description}</p>
-
+                      {/* Car More Details */}
                       <ul class="facility-list">
+                        {/* Car Max Guest */}
                         <li>
                           <img
                             src="/assets/images/icons/ic_round-people-alt.svg"
@@ -381,6 +237,7 @@ const CarClass = ({ carClassData, priceSchema }) => {
                             {item.max_guest} People
                           </p>
                         </li>
+                        {/* Car Max Suitcase */}
                         <li>
                           <img
                             src="/assets/images/icons/fa-solid_luggage-cart.svg"
@@ -391,53 +248,25 @@ const CarClass = ({ carClassData, priceSchema }) => {
                             {item.max_suitcase} pcs
                           </p>
                         </li>
-                        {/* <li>
-                                                    <img
-                                                        src="/assets/images/icons/ph_steering-wheel-fill.svg"
-                                                        alt="Icon"
-                                                        class="w-6"
-                                                    />
-                                                    <p class="text-sm font-bold">
-                                                        AC
-                                                    </p>
-                                                </li> */}
                       </ul>
-
+                      {/* Book Now container */}
                       <div class="flex max-sm:flex-col justify-between items-center">
+                        {/* Car price from schema */}
                         <p class="text-2xl font-bold max-sm:pb-5 sm:pr-4">
                           {`THB ${new Intl.NumberFormat("en-US").format(
-                            calculateResult.base_price
+                            relevantSchema.base_price
                           )}`}
                         </p>
+                        {/* Book Button */}
                         <button
                           onClick={() => {
+                            // Generate booklink to details after select car
+                            const booklink = `/car-details?booking_type=${booking_type}&airport_id=${relevantSchema.airport.id}&hotel_place_id=${hotel_place_id}&car_class_id=${item.id}&date=${date}`;
                             if (session) {
-                              window.location.href = `/car-details?origin=${
-                                bookingtype === "pickup"
-                                  ? origin_place_id
-                                  : destination_place_id
-                              }&destination=${
-                                bookingtype === "pickup"
-                                  ? destination_place_id
-                                  : origin_place_id
-                              }&car_class_id=${item.id}&date=${date}&schemaid=${
-                                calculateResult.id
-                              }&bookingtype=${bookingtype}&range=${distance}`;
+                              window.location.href = booklink;
                               return;
                             }
-                            setDestinationLink(
-                              `/car-details?origin=${
-                                bookingtype === "pickup"
-                                  ? origin_place_id
-                                  : destination_place_id
-                              }&destination=${
-                                bookingtype === "pickup"
-                                  ? destination_place_id
-                                  : origin_place_id
-                              }&car_class_id=${item.id}&date=${date}&schemaid=${
-                                calculateResult.id
-                              }&bookingtype=${bookingtype}&range=${distance}`
-                            );
+                            setDestinationLink(booklink);
                             setOpenLoginDialog(true);
                           }}
                           class="btn-blue flex-shrink-0"
