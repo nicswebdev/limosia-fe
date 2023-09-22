@@ -6,6 +6,7 @@ import React, { forwardRef, useEffect, useRef, useState } from "react";
 
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { date } from "yup";
 
 const Hero = ({ airportData, cheapestSchema, carClass }) => {
   //States to handle main tab
@@ -28,7 +29,7 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
     dropoff: false,
   });
 
-  const [airportType, setAirportType] = useState('pickup')
+  const [airportType, setAirportType] = useState("pickup");
   //To change airport tab
   const changeAirportTabTo = (tab) => {
     setAirportTab((prev) => ({
@@ -57,17 +58,13 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
   const today = new Date();
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
-
   const [checkin, setCheckin] = useState(new Date());
   const [checkout, setCheckout] = useState(tomorrow);
-
   const handleDateSelect = (value) => {
-    console.log(value);
     const tomorrow = new Date(value);
     tomorrow.setDate(tomorrow.getDate() + 1);
     setCheckout(tomorrow);
   };
-
   const monthNames = [
     "Jan",
     "Feb",
@@ -82,7 +79,6 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
     "Nov",
     "Dec",
   ];
-
   const ArrivalCustomInput = forwardRef(function MyInput(
     { value, onClick },
     ref
@@ -212,9 +208,9 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
 
   const submitAirportPickup = () => {
     if (airportPickupData.from && airportPickupData.to) {
-      console.log(airportPickupData.from);
+      // console.log(airportPickupData.from);
       router.push(
-        `/car-class?origin_place_id=${airportPickupData.from}&destination_place_id=${airportPickupData.to.place_id}&date=${checkin}&bookingtype=${airportType}`
+        `/car-class?booking_type=airportpickup&airport_place_id=${airportPickupData.from}&hotel_place_id=${airportPickupData.to.place_id}&date=${checkin}`
       );
     } else {
       alert("Please select both origin and destination point");
@@ -224,7 +220,7 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
     if (airportDropoffData.from && airportDropoffData.to) {
       console.log(airportDropoffData.from);
       router.push(
-        `/car-class?origin_place_id=${airportDropoffData.from.place_id}&destination_place_id=${airportDropoffData.to}&bookingtype=${airportType}`
+        `/car-class?booking_type=airportdropoff&airport_place_id=${airportDropoffData.to}&hotel_place_id=${airportDropoffData.from.place_id}&date=${checkin}`
       );
     } else {
       alert("Please select both origin and destination point");
@@ -290,7 +286,7 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
               <button
                 onClick={() => {
                   changeAirportTabTo("pickup");
-                  setAirportType('pickup')
+                  setAirportType("pickup");
                 }}
                 className={`w-1/2 ${
                   airportTab.pickup ? "bg-[#ED7A48] text-white" : ""
@@ -301,7 +297,7 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
               <button
                 onClick={() => {
                   changeAirportTabTo("dropoff");
-                  setAirportType('dropoff')
+                  setAirportType("dropoff");
                 }}
                 className={`w-1/2 ${
                   airportTab.dropoff ? "bg-[#ED7A48] text-white" : ""
