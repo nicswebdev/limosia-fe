@@ -1,4 +1,6 @@
 import LoginModal from "@/components/LoginModal";
+import useFindRange from "@/hooks/useFindRange";
+import { getRelevantSchema } from "@/utils/getRelevantSchema";
 import {
   DirectionsRenderer,
   GoogleMap,
@@ -13,9 +15,6 @@ import React, { useEffect, useRef, useState } from "react";
 const CarClass = ({ carClassData, priceSchema }) => {
   const mapRef = useRef(null);
   const router = useRouter();
-  // const { origin_place_id, destination_place_id, date, bookingtype } =
-  //   router.query;
-
   const { airport_place_id, hotel_place_id, booking_type, date } = router.query;
 
   const { data: session } = useSession();
@@ -24,9 +23,6 @@ const CarClass = ({ carClassData, priceSchema }) => {
     setOpenLoginDialog(false);
   };
 
-  const [distance, setDistance] = useState(0);
-  const [duration, setDuration] = useState("");
-  const [distanceValue, setDistanceValue] = useState(0);
   const [destinationLink, setDestinationLink] = useState("");
 
   useEffect(() => {
@@ -66,16 +62,6 @@ const CarClass = ({ carClassData, priceSchema }) => {
             if (status === "OK") {
               directionsRenderer.setDirections(response);
               const route = response.routes[0].legs[0];
-
-              // console.log(route);
-
-              // console.log(response);
-              setDistance(route.distance.text);
-              setDistanceValue(route.distance.value / 1000);
-              setDuration(route.duration.text);
-              // alert(
-              //     `Origin: ${route.start_address}\nDestination: ${route.end_address}\nDistance: ${route.distance.text}\nDuration: ${route.duration.text}`
-              // );
             } else {
               alert("Directions request failed due to " + status);
               console.error("Directions request failed", response);
@@ -90,64 +76,7 @@ const CarClass = ({ carClassData, priceSchema }) => {
     }
   }, []);
 
-  //Function to get the corresponding price schema based on the terms
-  function getBasePrice(carClassId) {
-    const place_id = airport_place_id;
-
-    // Step 1: Filter items based on place_id and car_class id
-    const filteredItems = priceSchema.items.filter(
-      (item) =>
-        item.airport.place_id === place_id && item.car_class.id === carClassId
-    );
-
-    // Step 2: Find an item where distance is between from_range_km and to_range_km
-    let basePriceItem = filteredItems.find(
-      (item) =>
-        distanceValue >= item.from_range_km && distanceValue <= item.to_range_km
-    );
-
-    // Step 3: If no item found in step 2, find the item with the highest to_range_km
-    if (!basePriceItem) {
-      basePriceItem = filteredItems.reduce(
-        (prev, current) => {
-          return prev.to_range_km > current.to_range_km ? prev : current;
-        },
-        { to_range_km: -1 }
-      ); // Initialize with -1 to handle empty filteredItems case
-    }
-    if (filteredItems.length === 0) {
-      return null;
-    }
-    // console.log(basePriceItem);
-    // Return the entire object
-    return basePriceItem;
-  }
-
-  // const {isLoaded} = useJsApiLoader({
-  //     googleMapsApiKey: "AIzaSyDv7zbUva4oy7ni_A7sKFYTpuE7yBhlz1E",
-  // });
-
-  // useEffect(() => {
-  //     async function fetchData() {
-  //         if (origin_place_id && destination_place_id) {
-  //             const directionsService = new google.maps.DirectionsService();
-
-  //             const results = await directionsService.route({
-  //                 origin: {placeId: origin_place_id},
-  //                 destination: {placeId: destination_place_id},
-  //                 travelMode: google.maps.TravelMode.DRIVING,
-  //             });
-
-  //             setDirectionsResponse(results);
-  //             setDistance(results.routes[0].legs[0].distance.text);
-  //             setDuration(results.routes[0].legs[0].duration.text);
-  //         }
-  //     }
-
-  //     fetchData();
-  // }, [origin_place_id, destination_place_id]);
-
-  // const center = { lat: 13.7566, lng: 100.49914 };
+  const range = useFindRange(airport_place_id, hotel_place_id);
 
   return (
     <>
@@ -182,10 +111,10 @@ const CarClass = ({ carClassData, priceSchema }) => {
 
           <div class="leading-relaxed">
             <p>
-              Total Range: <span class="font-bold">{distance}</span>
+              Total Range: <span class="font-bold">{range?.text}</span>
             </p>
             <p>
-              Total Duration: <span class="font-bold">{duration}</span>
+              Total Duration: <span class="font-bold">{range?.duration}</span>
             </p>
           </div>
         </div>
@@ -201,7 +130,12 @@ const CarClass = ({ carClassData, priceSchema }) => {
           <div class="flex flex-col gap-8">
             {carClassData.items.map((item, index) => {
               //Get the relevant schema for car class, airport, and range
-              const relevantSchema = getBasePrice(item.id);
+              const relevantSchema = getRelevantSchema(
+                priceSchema,
+                airport_place_id,
+                item.id,
+                range?.value
+              );
               //if no relevant schema for this car class return
               if (relevantSchema === null) {
                 return;

@@ -31,6 +31,9 @@ export default function App({
       if (window.initMap) {
         window.initMap();
       }
+      if (window.findDistance) {
+        window.findDistance();
+      }
     };
 
     loadScript(
