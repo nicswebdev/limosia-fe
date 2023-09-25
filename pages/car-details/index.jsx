@@ -1,11 +1,9 @@
 import { getServerSession } from "next-auth";
 import Head from "next/head";
 import Link from "next/link";
-import React, { forwardRef, useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { authOptions } from "../api/auth/[...nextauth]";
 import { useRouter } from "next/router";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import { useFindRelevantSchema } from "@/hooks/useFindRelevantSchema";
 import LoadingPage from "@/components/LoadingPage";
 
@@ -20,114 +18,21 @@ const CarDetails = ({ carData, allSchema, allAirportData }) => {
     (item) => item.id == airport_id
   );
 
-  //Date Params
-  const today = new Date();
-  const tomorrow = new Date(today);
-  const [checkin, setCheckin] = useState(new Date(date));
-  const [unfixedDate, setUnfixedDate] = useState(checkin);
-  const [checkout, setCheckout] = useState(tomorrow);
-  const monthNames = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const handleDateSelect = (value) => {
-    console.log(value);
-    const tomorrow = new Date(value);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    setCheckout(tomorrow);
-  };
-  const ArrivalCustomInput = forwardRef(function MyInput(
-    { value, onClick },
-    ref
-  ) {
-    const selectedDate = new Date(value);
-    return (
-      <input
-        onClick={onClick}
-        ref={ref}
-        id="checkins"
-        type="text"
-        value={
-          selectedDate.getDate() +
-          ` ` +
-          monthNames[selectedDate.getMonth()] +
-          ` ` +
-          selectedDate.getFullYear()
-        }
-        className="flex flex-col bg-white text-xs leading-none text-gray-dark karla font-bold bg-[#F6F6F6] rounded-md p-2"
-      />
-    );
-  });
-
-  //State to store distance from the google map
-  // const [distance, setDistance] = useState({
-  //   text: "",
-  //   value: 0,
-  // });
-
   //State to store hotel address
   const [hotelAddress, setHotelAddress] = useState("");
-  //State to store when user search for a hotel
-  const [searchHotel, setSearchHotel] = useState({
-    name: "",
-    place_id: "",
-  });
-  //State to store relevant scchema for this
-  // const [relevantSchema, setRelevantSchema] = useState();
-
-  const [airportIdChange, setAirportIdChange] = useState(thisAirport.id);
-
-  const autocompleteOriginRef = useRef("");
 
   useEffect(() => {
     sessionStorage.removeItem("bookLink");
     const initMap = async () => {
-      const autocompleteOrigin = new window.google.maps.places.Autocomplete(
-        autocompleteOriginRef.current,
-        {
-          types: ["lodging"],
-          fields: ["name", "place_id", "types"],
-          componentRestrictions: { country: "th" },
-        }
-      );
-      //Listen to search hotel
-      autocompleteOrigin.addListener("place_changed", () => {
-        const place = autocompleteOrigin.getPlace();
-        // console.log(place);
-        if (place && place.types.indexOf("lodging") === -1) {
-          alert("Please select a hotel");
-          autocompleteOriginRef.current.value = "";
-        } else {
-          setSearchHotel({
-            name: place.formatted_address,
-            place_id: place.place_id,
-          });
-        }
-      });
       const geocoder = new google.maps.Geocoder();
       const hotelPlace = await geocoder.geocode({ placeId: hotel_place_id });
       setHotelAddress(hotelPlace.results[0].formatted_address);
-      setSearchHotel({
-        name: hotelPlace.results[0].formatted_address,
-        place_id: hotelPlace.results[0].place_id,
-      });
     };
     window.initMap = initMap;
     if (window.google && window.google.maps) {
       initMap();
     }
-  }, [thisAirport]);
+  }, [hotel_place_id]);
 
   // const distance = useFindRange(thisAirport.place_id, hotel_place_id)
   const relevantSchema = useFindRelevantSchema(
@@ -136,18 +41,6 @@ const CarDetails = ({ carData, allSchema, allAirportData }) => {
     allSchema,
     hotel_place_id
   );
-
-  useEffect(() => {
-    setCheckin(new Date(date));
-  }, [date]);
-
-  const handleChangeBookingSubmit = () => {
-    const { booking_type } = router.query;
-    const newDate = unfixedDate;
-    const airport_id = airportIdChange;
-    const newLink = `/car-details?booking_type=${booking_type}&airport_id=${airport_id}&hotel_place_id=${searchHotel.place_id}&car_class_id=${car_class_id}&date=${newDate}`;
-    router.push(newLink);
-  };
 
   return (
     <>
@@ -181,213 +74,7 @@ const CarDetails = ({ carData, allSchema, allAirportData }) => {
             </div>
 
             <div class="main-content">
-              <form className="flex flex-col md:flex-row max-md:gap-4 justify-between md:items-center px-4 md:px-8 py-4 mb-5 rounded-[0.625rem] box-shadow bg-gray-light">
-                {/* Origin */}
-                <div className="flex gap-5 items-center">
-                  <img
-                    src="/assets/images/icons/icon-park-outline_to-bottom.svg"
-                    alt="Icon"
-                    class="w-6"
-                  />
-                  {/* This is the airport field */}
-                  <div className="flex flex-col flex-shrink-0 gap-[0.375rem]">
-                    <div className="flex items-center">
-                      <label
-                        for="airport"
-                        className="text-xs font-bold leading-none"
-                      >
-                        FROM
-                      </label>
-                    </div>
-                    {booking_type === "airportpickup" ? (
-                      //Airport Dropdown
-                      <select
-                        onChange={(event) => {
-                          setAirportIdChange(event.target.value);
-                        }}
-                        value={airportIdChange}
-                        id="airport"
-                        className="flex flex-col bg-white text-xs leading-none text-gray-dark karla font-bold bg-[#F6F6F6] rounded-md p-2 hover:cursor-pointer"
-                        defaultValue={thisAirport.id}
-                      >
-                        {allAirportData.items.map((airport) => {
-                          return (
-                            <option key={airport.id} value={airport.id}>
-                              {airport.name}
-                            </option>
-                          );
-                        })}
-                      </select>
-                    ) : (
-                      //Hotel Search
-                      <input
-                        value={searchHotel.name}
-                        onChange={(event) => {
-                          setSearchHotel((prev) => ({
-                            ...prev,
-                            name: event.target.value,
-                          }));
-                        }}
-                        className="bg-white text-xs leading-none text-gray-dark karla font-bold rounded-md p-2"
-                        ref={autocompleteOriginRef}
-                      />
-                    )}
-                  </div>
-                </div>
-
-                {/* This is the destination field*/}
-                <div className="flex gap-5 items-center">
-                  <img
-                    src="/assets/images/icons/icon-park-outline_to-bottom.svg"
-                    alt="Icon"
-                    className="w-6 rotate-180"
-                  />
-                  <div className="flex flex-col flex-shrink-0 gap-[0.375rem]">
-                    <label
-                      for="destination"
-                      className="text-xs font-bold leading-none"
-                    >
-                      DESTINATION
-                    </label>
-                    {booking_type === "airportpickup" ? (
-                      //Hotel search
-                      <input
-                        value={searchHotel.name}
-                        onChange={(event) => {
-                          setSearchHotel((prev) => ({
-                            ...prev,
-                            name: event.target.value,
-                          }));
-                        }}
-                        className="bg-white text-xs leading-none text-gray-dark karla font-bold bg-[#F6F6F6] rounded-md p-2"
-                        ref={autocompleteOriginRef}
-                      />
-                    ) : (
-                      //Airport dropdown
-                      <select
-                        onChange={(event) => {
-                          setAirportIdChange(event.target.value);
-                        }}
-                        value={airportIdChange}
-                        id="airport"
-                        className="bg-white text-xs leading-none text-gray-dark karla font-bold bg-[#F6F6F6] rounded-md p-2 hover:cursor-pointer"
-                        defaultValue={thisAirport.id}
-                      >
-                        {allAirportData.items.map((airport) => {
-                          return (
-                            <option key={airport.id} value={airport.id}>
-                              {airport.name}
-                            </option>
-                          );
-                        })}
-                      </select>
-                    )}
-                  </div>
-                </div>
-
-                {/* Date Field */}
-                <div className="flex gap-5 items-center">
-                  <img
-                    src="/assets/images/icons/uiw_date.svg"
-                    alt="Icon"
-                    className="w-6 px-[0.125rem]"
-                  />
-                  <div class="flex flex-col flex-shrink-0 gap-[0.375rem]">
-                    <label
-                      for="date"
-                      className="text-xs font-bold leading-none"
-                    >
-                      DATE
-                    </label>
-                    <DatePicker
-                      selected={unfixedDate}
-                      dateFormat="yyyy-MM-dd"
-                      onChange={(date) => setUnfixedDate(date)}
-                      onSelect={handleDateSelect}
-                      minDate={today}
-                      customInput={<ArrivalCustomInput />}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <button
-                    type="button"
-                    onClick={handleChangeBookingSubmit}
-                    className="text-xs font-bold leading-none text-orange-light"
-                  >
-                    CHANGE BOOKING
-                  </button>
-                </div>
-              </form>
-
-              {/* <form
-          action="#"
-          class="flex flex-col md:flex-row max-md:gap-4 justify-between md:items-center px-4 md:px-8 py-4 mb-5 rounded-[10px] box-shadow bg-gray-light"
-        >
-          <div class="flex gap-5 items-center">
-            <img
-              src="/assets/images/icons/icon-park-outline_check-one-orange.svg"
-              alt="Icon"
-            />
-            <div class="flex flex-col flex-shrink-0 gap-[6px]">
-              <label
-                for="vehicle"
-                class="text-xs font-bold leading-none text-orange-dark"
-              >
-                VEHICLE
-              </label>
-              <select
-                id="vehicle"
-                class="appearance-none bg-transparent text-xs leading-none text-gray-dark"
-              >
-                <option>SELECTION</option>
-                <option>SELECTION 1</option>
-                <option>SELECTION 2</option>
-                <option>SELECTION 3</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="flex gap-5 items-center">
-            <img
-              src="/assets/images/icons/icon-park-outline_check-one-gray.svg"
-              alt="Icon"
-            />
-            <div class="flex flex-col flex-shrink-0 gap-[6px]">
-              <label for="extras" class="text-xs font-bold leading-none">
-                EXTRAS
-              </label>
-              <select
-                id="extras"
-                class="appearance-none bg-transparent text-xs leading-none text-gray-dark"
-              >
-                <option>SELECTION</option>
-                <option>SELECTION 1</option>
-                <option>SELECTION 2</option>
-                <option>SELECTION 3</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="flex gap-5 items-center">
-            <img
-              src="/assets/images/icons/icon-park-outline_check-one-gray.svg"
-              alt="Icon"
-            />
-            <div class="flex flex-col flex-shrink-0 gap-[6px]">
-              <label for="date" class="text-xs font-bold leading-none">
-                DRIVER
-              </label>
-              <input
-                id="date"
-                type="text"
-                placeholder="DETAILS"
-                class="appearance-none bg-transparent text-xs leading-none text-gray-dark"
-              />
-            </div>
-          </div>
-        </form> */}
+              {/* <ChangeBookingDetailsWidget allAirportData={allAirportData} /> */}
 
               <div className="px-4 py-8 md:p-6 xl:p-10 rounded-[15px] box-shadow text-black-2">
                 <p className="title">Vehicle</p>
@@ -422,28 +109,9 @@ const CarDetails = ({ carData, allSchema, allAirportData }) => {
                   </p>
                   <p>
                     Date:{" "}
-                    <span className="font-medium text-gray-dark">
-                      {checkin.getDate() +
-                        ` ` +
-                        monthNames[checkin.getMonth()] +
-                        ` ` +
-                        checkin.getFullYear()}
-                    </span>
+                    <span className="font-medium text-gray-dark">{date}</span>
                   </p>
                 </div>
-                {/* <ul class="list-term pt-5 pb-6">
-            <li>Rebooking and cancellation (subject to charges)</li>
-            <li>Unlimited miles</li>
-            <li>Third party insurance</li>
-            <li>
-              <a href="#" class="link">
-                More information ›
-              </a>
-            </li>
-            <li>Loss Damage Waiver</li>
-          </ul> */}
-
-                {/* <p class="text-4xl font-bold max-sm:pb-5 sm:pr-4">USD 15</p> */}
 
                 <hr class="my-8 border-[#D9D9D9]" />
 

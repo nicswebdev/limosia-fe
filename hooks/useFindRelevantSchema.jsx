@@ -22,13 +22,13 @@ export const useFindRelevantSchema = (
       carClassId,
       range.value
     );
-    console.log(schema)
+    // console.log(schema)
     setRelevantSchema({
       schema,
       range,
     });
   }, [range]);
-  console.log(relevantSchema);
+  // console.log(relevantSchema);
 
   return relevantSchema;
 };

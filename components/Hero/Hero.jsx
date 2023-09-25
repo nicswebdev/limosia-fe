@@ -7,8 +7,13 @@ import React, { forwardRef, useEffect, useRef, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { date } from "yup";
+import DateInput from "../CustomInputs/DateInput";
 
-const Hero = ({ airportData, cheapestSchema, carClass }) => {
+const Hero = ({ airportData, cheapestSchema }) => {
+  const [checkin, setCheckin] = useState(new Date());
+  const handleDateChange = (value) => {
+    setCheckin(value);
+  };
   //States to handle main tab
   const [mainTab, setMainTab] = useState({
     airportTransfer: true,
@@ -29,7 +34,6 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
     dropoff: false,
   });
 
-  const [airportType, setAirportType] = useState("pickup");
   //To change airport tab
   const changeAirportTabTo = (tab) => {
     setAirportTab((prev) => ({
@@ -38,15 +42,9 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
     }));
   };
   //To store data when using airport pickup
-  const [airportPickupData, setAirportPickupData] = useState({
-    from: "",
-    to: "",
-    passenger: "",
-  });
-  //To store data when using airport pickup
-  const [airportDropoffData, setAirportDropoffData] = useState({
-    from: "",
-    to: "",
+  const [airportTransferData, setAirportTransferData] = useState({
+    airport: "",
+    hotel: "",
     passenger: "",
   });
 
@@ -55,58 +53,6 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
     to: "",
   });
 
-  const today = new Date();
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const [checkin, setCheckin] = useState(new Date());
-  const [checkout, setCheckout] = useState(tomorrow);
-  const handleDateSelect = (value) => {
-    const tomorrow = new Date(value);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    setCheckout(tomorrow);
-  };
-  const monthNames = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-  const ArrivalCustomInput = forwardRef(function MyInput(
-    { value, onClick },
-    ref
-  ) {
-    const selectedDate = new Date(value);
-    return (
-      <>
-        <label className="karla text-[12px]">Date :</label>
-        <input
-          onClick={onClick}
-          ref={ref}
-          id="checkins"
-          type="text"
-          value={
-            selectedDate.getDate() +
-            ` ` +
-            monthNames[selectedDate.getMonth()] +
-            ` ` +
-            selectedDate.getFullYear()
-          }
-          className="form-control karla font-bold text-[16px]"
-        />
-      </>
-    );
-  });
-
-  // const [originAirport, setOriginAirport] = useState("");
-  // const [destinationHotel, setDestinationHotel] = useState(null);
   const autocompleteOriginRef = useRef(null);
   const autocompleteDestinationRef = useRef(null);
   const router = useRouter();
@@ -132,9 +78,9 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
           autocompleteOriginRef.current.value = "";
         } else {
           // setDestinationHotel(place);
-          setAirportDropoffData((prev) => ({
+          setAirportTransferData((prev) => ({
             ...prev,
-            from: place,
+            hotel: place,
           }));
         }
       });
@@ -157,9 +103,9 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
           autocompleteDestinationRef.current.value = "";
         } else {
           // setDestinationHotel(place);
-          setAirportPickupData((prev) => ({
+          setAirportTransferData((prev) => ({
             ...prev,
-            to: place,
+            hotel: place,
           }));
         }
       });
@@ -195,44 +141,27 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
     }
   }, []);
 
-  // const handleButtonClick = () => {
-  //   if (originAirport && destinationHotel) {
-  //     console.log(originAirport);
-  //     router.push(
-  //       `/car-class?origin_place_id=${originAirport}&destination_place_id=${destinationHotel.place_id}`
-  //     );
-  //   } else {
-  //     alert("Please select both origin and destination point");
-  //   }
-  // };
-
-  const submitAirportPickup = () => {
-    if (airportPickupData.from && airportPickupData.to) {
+  const submitAirportTransfer = () => {
+    console.log(airportTransferData);
+    if (airportTransferData.airport && airportTransferData.hotel) {
+      if (airportTab.pickup) {
+        router.push(
+          `/car-class?booking_type=airportpickup&airport_id=${airportTransferData.airport}&hotel_place_id=${airportTransferData.hotel.place_id}&date=${checkin}`
+        );
+      }
+      if (airportTab.dropoff) {
+        router.push(
+          `/car-class?booking_type=airportdropoff&airport_id=${airportTransferData.airport}&hotel_place_id=${airportTransferData.hotel.place_id}&date=${checkin}`
+        );
+      }
       // console.log(airportPickupData.from);
-      router.push(
-        `/car-class?booking_type=airportpickup&airport_place_id=${airportPickupData.from}&hotel_place_id=${airportPickupData.to.place_id}&date=${checkin}`
-      );
-    } else {
-      alert("Please select both origin and destination point");
-    }
-  };
-  const submitAirportDropoff = () => {
-    if (airportDropoffData.from && airportDropoffData.to) {
-      console.log(airportDropoffData.from);
-      router.push(
-        `/car-class?booking_type=airportdropoff&airport_place_id=${airportDropoffData.to}&hotel_place_id=${airportDropoffData.from.place_id}&date=${checkin}`
-      );
     } else {
       alert("Please select both origin and destination point");
     }
   };
 
   const handleBookSubmit = () => {
-    if (airportTab.pickup) {
-      submitAirportPickup();
-    } else {
-      submitAirportDropoff();
-    }
+    submitAirportTransfer();
   };
 
   return (
@@ -286,7 +215,6 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
               <button
                 onClick={() => {
                   changeAirportTabTo("pickup");
-                  setAirportType("pickup");
                 }}
                 className={`w-1/2 ${
                   airportTab.pickup ? "bg-[#ED7A48] text-white" : ""
@@ -297,7 +225,6 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
               <button
                 onClick={() => {
                   changeAirportTabTo("dropoff");
-                  setAirportType("dropoff");
                 }}
                 className={`w-1/2 ${
                   airportTab.dropoff ? "bg-[#ED7A48] text-white" : ""
@@ -317,10 +244,9 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
                     <label className="karla text-[12px]">From :</label>
                     <select
                       onChange={(event) => {
-                        // setOriginAirport(event.target.value);
-                        setAirportPickupData((prev) => ({
+                        setAirportTransferData((prev) => ({
                           ...prev,
-                          from: event.target.value,
+                          airport: event.target.value,
                         }));
                       }}
                       className="form-control karla font-bold text-[16px]"
@@ -331,7 +257,7 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
                       {airportData.items.map((airport) => {
                         return (
                           <option
-                            value={airport.place_id}
+                            value={airport.id}
                             className=""
                             key={airport.id}
                           >
@@ -355,18 +281,15 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
 
                   {/* Airport transfer other fields */}
                   <div className="flex flex-row justify-between gap-1 w-[100%]">
-                    <div className="bg-[#F6F6F6] rounded-[100px] self-start py-2 px-5 flex flex-col w-[47%]">
-                      <DatePicker
-                        selected={checkin}
-                        dateFormat="yyyy-MM-dd"
-                        onChange={(date) => setCheckin(date)}
-                        onSelect={handleDateSelect}
-                        minDate={today}
-                        customInput={<ArrivalCustomInput />}
+                    <div className="bg-[#F6F6F6] rounded-[100px] self-end py-2 px-5 flex flex-col w-[47%]">
+                      <label className="karla text-[12px]">Date :</label>
+                      <DateInput
+                        className="form-control karla font-bold text-[16px]"
+                        handleDateChange={handleDateChange}
                       />
                     </div>
                     <div className="bg-[#F6F6F6] rounded-[100px] self-end py-2 px-5 flex flex-col w-[47%]">
-                      <label className="karla text-[12px]">Passanger :</label>
+                      <label className="karla text-[12px]">Passenger :</label>
                       <select className="form-control karla font-bold text-[16px]">
                         <option value="1">1</option>
                         <option value="2" selected>
@@ -402,9 +325,9 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
                     <label className="karla text-[12px]">To :</label>
                     <select
                       onChange={(event) => {
-                        setAirportDropoffData((prev) => ({
+                        setAirportTransferData((prev) => ({
                           ...prev,
-                          to: event.target.value,
+                          airport: event.target.value,
                         }));
                       }}
                       className="form-control karla font-bold text-[16px]"
@@ -415,7 +338,7 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
                       {airportData.items.map((airport) => {
                         return (
                           <option
-                            value={airport.place_id}
+                            value={airport.id}
                             className=""
                             key={airport.id}
                           >
@@ -427,14 +350,11 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
                   </div>
                   {/* Airport transfer other fields */}
                   <div className="flex flex-row justify-between gap-1 w-[100%]">
-                    <div className="bg-[#F6F6F6] rounded-[100px] self-start py-2 px-5 flex flex-col w-[47%]">
-                      <DatePicker
-                        selected={checkin}
-                        dateFormat="yyyy-MM-dd"
-                        onChange={(date) => setCheckin(date)}
-                        onSelect={handleDateSelect}
-                        minDate={today}
-                        customInput={<ArrivalCustomInput />}
+                    <div className="bg-[#F6F6F6] rounded-[100px] self-end py-2 px-5 flex flex-col w-[47%]">
+                      <label className="karla text-[12px]">Date :</label>
+                      <DateInput
+                        className="form-control karla font-bold text-[16px]"
+                        handleDateChange={handleDateChange}
                       />
                     </div>
                     <div className="bg-[#F6F6F6] rounded-[100px] self-end py-2 px-5 flex flex-col w-[47%]">
@@ -470,14 +390,11 @@ const Hero = ({ airportData, cheapestSchema, carClass }) => {
                   />
                 </div>
                 <div className="flex flex-row justify-between gap-1 w-[100%]">
-                  <div className="bg-[#F6F6F6] rounded-[100px] self-start py-2 px-5 flex flex-col w-[47%]">
-                    <DatePicker
-                      selected={checkin}
-                      dateFormat="yyyy-MM-dd"
-                      onChange={(date) => setCheckin(date)}
-                      onSelect={handleDateSelect}
-                      minDate={today}
-                      customInput={<ArrivalCustomInput />}
+                  <div className="bg-[#F6F6F6] rounded-[100px] self-end py-2 px-5 flex flex-col w-[47%]">
+                    <label className="karla text-[12px]">Date :</label>
+                    <DateInput
+                      className="form-control karla font-bold text-[16px]"
+                      handleDateChange={handleDateChange}
                     />
                   </div>
                   <div className="bg-[#F6F6F6] rounded-[100px] self-end py-2 px-5 flex flex-col w-[47%]">

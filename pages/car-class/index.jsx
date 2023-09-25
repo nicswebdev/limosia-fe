@@ -1,21 +1,21 @@
+import ChangeBookingDetailsWidget from "@/components/ChangeBookingDetailsWidget/ChangeBookingDetailsWidget";
 import LoginModal from "@/components/LoginModal";
 import useFindRange from "@/hooks/useFindRange";
 import { getRelevantSchema } from "@/utils/getRelevantSchema";
-import {
-  DirectionsRenderer,
-  GoogleMap,
-  useJsApiLoader,
-} from "@react-google-maps/api";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useRef, useState } from "react";
 
-const CarClass = ({ carClassData, priceSchema }) => {
+const CarClass = ({ carClassData, priceSchema, allAirportData }) => {
   const mapRef = useRef(null);
   const router = useRouter();
-  const { airport_place_id, hotel_place_id, booking_type, date } = router.query;
+  const { hotel_place_id, booking_type, date, airport_id } = router.query;
+
+  const thisAirport = allAirportData.items.find(
+    (item) => item.id == airport_id
+  );
+  const airport_place_id = thisAirport.place_id;
 
   const { data: session } = useSession();
   const [openLoginDialog, setOpenLoginDialog] = useState(false);
@@ -74,7 +74,7 @@ const CarClass = ({ carClassData, priceSchema }) => {
     if (window.google && window.google.maps) {
       initMap();
     }
-  }, []);
+  }, [thisAirport, hotel_place_id]);
 
   const range = useFindRange(airport_place_id, hotel_place_id);
 
@@ -127,6 +127,7 @@ const CarClass = ({ carClassData, priceSchema }) => {
             />
           )}
           {/* // Work Here */}
+          <ChangeBookingDetailsWidget allAirportData={allAirportData} />
           <div class="flex flex-col gap-8">
             {carClassData.items.map((item, index) => {
               //Get the relevant schema for car class, airport, and range
@@ -230,11 +231,15 @@ export async function getServerSideProps() {
   const priceSchema = await fetch(
     `${apiPath}/price-schema?page=1&limit=9999999&sortBy=ASC`
   ).then((res) => res.json());
+  const allAirportData = await fetch(
+    `${apiPath}/airports?page=1&limit=9999999&sortBy=ASC`
+  ).then((res) => res.json());
 
   return {
     props: {
       carClassData,
       priceSchema,
+      allAirportData,
     },
   };
 }

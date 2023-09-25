@@ -34,7 +34,7 @@ function useFindRange(airportPlaceId, hotelPlaceId) {
     if (!airportPlaceId || !hotelPlaceId) {
       return;
     }
-    console.log("runs");
+    // console.log("runs");
     window.findDistance = findDistance;
     if (window.google && window.google.maps) {
       findDistance();

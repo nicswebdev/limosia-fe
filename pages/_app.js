@@ -34,6 +34,12 @@ export default function App({
       if (window.findDistance) {
         window.findDistance();
       }
+      if (window.autoComplete) {
+        window.autoComplete();
+      }
+      if (window.findHotelAddress) {
+        window.findHotelAddress();
+      }
     };
 
     loadScript(
