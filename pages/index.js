@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Head from "next/head";
-import Hero from "@/components/Hero";
+import Hero from "@/components/Hero/Hero";
 import CarClass from "@/components/CarClass";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
