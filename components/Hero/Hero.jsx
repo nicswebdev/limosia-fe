@@ -1,12 +1,6 @@
-import { useJsApiLoader } from "@react-google-maps/api";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { forwardRef, useEffect, useRef, useState } from "react";
-
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import { date } from "yup";
+import React, { useEffect, useRef, useState } from "react";
 import DateInput from "../CustomInputs/DateInput";
 
 const Hero = ({ airportData, cheapestSchema }) => {
@@ -268,7 +262,7 @@ const Hero = ({ airportData, cheapestSchema }) => {
                     </select>
                   </div>
 
-                  {/* Airport transfer pickup to field */}
+                  {/* Airport transfer pickup hotel field */}
                   <div className="bg-[#F6F6F6] rounded-[100px] py-2 px-5 flex flex-col">
                     <label className="karla text-[12px]">To :</label>
                     <input
