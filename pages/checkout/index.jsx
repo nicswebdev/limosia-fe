@@ -1,250 +1,468 @@
+import CheckoutBookingDetails from "@/components/Checkout/CheckoutBookingDetails/CheckoutBookingDetails";
+import LoadingPage from "@/components/LoadingPage";
+import { useFindHotelAddress } from "@/hooks/useFindHotelAddress";
+import { useFindRelevantSchema } from "@/hooks/useFindRelevantSchema";
 import Head from "next/head";
 import Link from "next/link";
-import React from "react";
+import { useRouter } from "next/router";
+import React, { useState } from "react";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import DateInput from "@/components/CustomInputs/DateInput";
+import TimePicker from "react-time-picker";
+import TimeInput from "@/components/CustomInputs/TimeInput";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../api/auth/[...nextauth]";
 
-const Checkout = () => {
-    return (
+const Checkout = ({ thisAirport, allSchema, access_token }) => {
+  const router = useRouter();
+  const { date, car_class_id, airport_id, booking_type, hotel_place_id } =
+    router.query;
+
+  const relevantSchema = useFindRelevantSchema(
+    car_class_id,
+    thisAirport.place_id,
+    allSchema,
+    hotel_place_id
+  );
+
+  const hotelAddress = useFindHotelAddress(hotel_place_id);
+
+  const validationSchema = Yup.object().shape({
+    f_name: Yup.string().required("First Name is required"),
+    l_name: Yup.string().required("Last Name is required"),
+    // email: Yup.string()
+    //   .required("Email is required")
+    //   .email("Please provide a valid email format"),
+    phone: Yup.string().required("Phone is required"),
+    dob: Yup.date().required("Birth Date is required"),
+    address: Yup.string().required("Address is required"),
+    city: Yup.string().required("City is required"),
+    state: Yup.string().required("State is required"),
+    zip_code: Yup.string().required("Zip Code is required"),
+    flight_number: Yup.string().required("Flight Number is required"),
+    pickup_time: Yup.string().required("Arrival Time is required"),
+  });
+  const formik = useFormik({
+    initialValues: {
+      order_no: "",
+      f_name: "",
+      l_name: "",
+      phone: "",
+      address: "",
+      city: "",
+      state: "",
+      zip_code: "",
+      flight_number: "",
+      pickup_time: "",
+      dob: new Date("2001-03-25"),
+    }, // Pass the Yup schema to validate the form
+    validationSchema: validationSchema,
+
+    // Handle form submission
+    onSubmit: async (
+      {
+        f_name,
+        l_name,
+        phone,
+        dob,
+        address,
+        city,
+        state,
+        zip_code,
+        pickup_time,
+        flight_number,
+      },
+      { setErrors }
+    ) => {
+      const formData = {
+        order_no: "A1",
+        f_name,
+        l_name,
+        phone,
+        dob,
+        address,
+        city,
+        state,
+        zip_code,
+        pickup_point: relevantSchema.schema.airport.name,
+        destination_point: hotel_place_id,
+        pickup_date: new Date(date),
+        pickup_time,
+        flight_number,
+        total_guest: 0,
+        total_suitcase: 0,
+        car_class_name: car_class_id,
+        airport_name: relevantSchema.schema.airport.name,
+        range: relevantSchema.range.value / 1000,
+        total_price: relevantSchema.schema.base_price,
+        price_schema_name: relevantSchema.schema.tier_name,
+        order_currency: "THB",
+        payment_status_id: 1,
+        order_status_id: 1,
+      };
+      console.log(formData);
+
+      const apiPath = process.env.NEXT_PUBLIC_API_PATH;
+      const res = await fetch(`${apiPath}/orders`, {
+        method: "POST",
+        body: JSON.stringify(formData),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${access_token}`,
+        },
+      });
+      const resData = await res.json();
+      // console.log(resData);
+      if (!res.ok) {
+        alert('Internal Server Error')
+        return;
+      }
+      router.push('/thank-you')
+      return
+    },
+  });
+  const {
+    errors,
+    touched,
+    values,
+    handleChange,
+    handleSubmit,
+    handleBlur,
+    isSubmitting,
+    setFieldValue,
+  } = formik;
+
+  const handleTimeChange = (value) => {
+    setFieldValue("pickup_time", value);
+  };
+
+  // const [dob, setDob] = useState(new Date());
+  const handleDobChange = (value) => {
+    setFieldValue("dob", value);
+  };
+
+  return (
+    <>
+      <Head>
+        <title>Limosia - Checkout</title>
+      </Head>
+      {!relevantSchema ? (
+        <LoadingPage />
+      ) : (
         <>
-            <Head>
-                <title>Limosia - Checkout</title>
-            </Head>
-            <div class="main-container pb-9 mt-28">
-                <p class="title-orange">Checkout</p>
-            </div>
+          <div className="main-container pb-9 mt-28">
+            <p className="title-orange">Checkout</p>
+          </div>
+          <form
+            onSubmit={formik.handleSubmit}
+            className="main-container pb-20 lg:pb-32"
+          >
+            <div className="main-content lg:basis-[calc((100%-20px)*(60/100))] xxl:basis-[630px]">
+              <p className="title pb-8">Details</p>
+              <div className="pb-8">
+                {/* <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 pb-3">
+                  <div className="relative">
+                    <span className="absolute top-[10px] left-8 text-xs text-gray-dark">
+                      Title
+                    </span>
+                    <select name="" id="" className="custom-select pt-6">
+                      <option value="">Mr.</option>
+                      <option value="">Mr.</option>
+                      <option value="">Mr.</option>
+                    </select>
+                  </div>
+                </div> */}
 
-            <div class="main-container pb-20 lg:pb-32">
-                <div class="main-content lg:basis-[calc((100%-20px)*(60/100))] xxl:basis-[630px]">
-                    <p class="title pb-8">Details</p>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-3 gap-x-5">
+                  <div className="flex flex-col">
+                    <label className="block pb-2 font-bold text-sm text-gray-dark">
+                      First Name
+                    </label>
+                    <label className="custom-label">
+                      <input
+                        type="text"
+                        name="f_name"
+                        onChange={formik.handleChange}
+                        onBlur={handleBlur}
+                        value={formik.values.f_name}
+                        placeholder="First Name*"
+                        className="custom-input"
+                      />
+                    </label>
+                    {errors.f_name && touched.f_name && (
+                      <p className="ml-4 mt-1 text-[#FF3333] font-bold karla text-sm">
+                        {errors.f_name}
+                      </p>
+                    )}
+                  </div>
 
-                    <div class="pb-8">
-                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 pb-3">
-                            <div class="relative">
-                                <span class="absolute top-[10px] left-8 text-xs text-gray-dark">
-                                    Title
-                                </span>
-                                <select
-                                    name=""
-                                    id=""
-                                    class="custom-select pt-6"
-                                >
-                                    <option value="">Mr.</option>
-                                    <option value="">Mr.</option>
-                                    <option value="">Mr.</option>
-                                </select>
-                            </div>
-                        </div>
+                  <div className="flex flex-col">
+                    <label className="block pb-2 font-bold text-sm text-gray-dark">
+                      Last Name
+                    </label>
+                    <label className="custom-label">
+                      <input
+                        type="text"
+                        name="l_name"
+                        onChange={formik.handleChange}
+                        onBlur={handleBlur}
+                        value={formik.values.l_name}
+                        placeholder="Last Name*"
+                        className="custom-input"
+                      />
+                    </label>
+                    {errors.l_name && touched.l_name && (
+                      <p className="ml-4 mt-1 text-[#FF3333] font-bold karla text-sm">
+                        {errors.l_name}
+                      </p>
+                    )}
+                  </div>
 
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-y-3 gap-x-5">
-                            <label class="custom-label">
-                                <input
-                                    type="text"
-                                    name=""
-                                    id=""
-                                    placeholder="First Name*"
-                                    class="custom-input"
-                                />
-                            </label>
+                  <div className="flex flex-col">
+                    <label className="block pb-2 font-bold text-sm text-gray-dark">
+                      Phone
+                    </label>
+                    <label className="custom-label">
+                      <input
+                        type="text"
+                        name="phone"
+                        onChange={formik.handleChange}
+                        value={formik.values.phone}
+                        onBlur={handleBlur}
+                        placeholder="Phone*"
+                        className="custom-input"
+                      />
+                    </label>
+                    {errors.phone && touched.phone && (
+                      <p className="ml-4 mt-1 text-[#FF3333] font-bold karla text-sm">
+                        {errors.phone}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
 
-                            <label class="custom-label">
-                                <input
-                                    type="text"
-                                    name=""
-                                    id=""
-                                    placeholder="Last Name*"
-                                    class="custom-input"
-                                />
-                            </label>
+              <div className="flex flex-col pb-6">
+                <label className="block pb-2 font-bold text-sm text-gray-dark">
+                  Date of Birth
+                </label>
+                <DateInput
+                  selectedDate={formik.values.dob}
+                  className="custom-select w-full"
+                  handleDateChange={handleDobChange}
+                  showYearDropdown
+                  scrollableYearDropdown
+                  maxDate={new Date("2012-12-30")}
+                />
+                {errors.dob && touched.dob && (
+                  <p className="ml-4 mt-1 text-[#FF3333] font-bold karla text-sm">
+                    {errors.dob}
+                  </p>
+                )}
+              </div>
 
-                            <label class="custom-label">
-                                <input
-                                    type="text"
-                                    name=""
-                                    id=""
-                                    placeholder="Phone*"
-                                    class="custom-input"
-                                />
-                            </label>
+              <div className="flex flex-col pb-3">
+                <label className="block pb-2 font-bold text-sm text-gray-dark">
+                  Address
+                </label>
+                <label className="custom-label w-full">
+                  <input
+                    type="text"
+                    name="address"
+                    onChange={formik.handleChange}
+                    onBlur={handleBlur}
+                    value={formik.values.address}
+                    placeholder="Address"
+                    className="custom-input"
+                  />
+                </label>
+                {errors.address && touched.address && (
+                  <p className="ml-4 mt-1 text-[#FF3333] font-bold karla text-sm">
+                    {errors.address}
+                  </p>
+                )}
+              </div>
 
-                            <label class="custom-label">
-                                <input
-                                    type="text"
-                                    name=""
-                                    id=""
-                                    placeholder="Email address*"
-                                    class="custom-input"
-                                />
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="pb-8">
-                        <label class="block pl-8 pb-2 font-bold text-gray-dark">
-                            Date of birth*
-                        </label>
-
-                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-y-3 gap-x-5">
-                            <div class="relative">
-                                <select name="" id="" class="custom-select">
-                                    <option value="">Day</option>
-                                    <option value="">Day</option>
-                                    <option value="">Day</option>
-                                </select>
-                            </div>
-
-                            <div class="relative">
-                                <select name="" id="" class="custom-select">
-                                    <option value="">Month</option>
-                                    <option value="">Month</option>
-                                    <option value="">Month</option>
-                                </select>
-                            </div>
-
-                            <div class="relative">
-                                <select name="" id="" class="custom-select">
-                                    <option value="">Year</option>
-                                    <option value="">Year</option>
-                                    <option value="">Year</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="pb-8">
-                        <div class="grid grid-cols-1 pb-3">
-                            <label class="custom-label w-full">
-                                <input
-                                    type="text"
-                                    name=""
-                                    id=""
-                                    placeholder="Address"
-                                    class="custom-input"
-                                />
-                            </label>
-                        </div>
-
-                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-y-3 gap-x-5">
-                            <label class="custom-label">
-                                <input
-                                    type="text"
-                                    name=""
-                                    id=""
-                                    placeholder="City"
-                                    class="custom-input"
-                                />
-                            </label>
-
-                            <div class="relative">
-                                <select name="" id="" class="custom-select">
-                                    <option value="">State</option>
-                                    <option value="">State</option>
-                                    <option value="">State</option>
-                                </select>
-                            </div>
-
-                            <label class="custom-label">
-                                <input
-                                    type="text"
-                                    name=""
-                                    id=""
-                                    placeholder="Zip Code"
-                                    class="custom-input"
-                                />
-                            </label>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="grid grid-cols-1">
-                            <label class="custom-label w-full">
-                                <input
-                                    type="text"
-                                    name=""
-                                    id=""
-                                    placeholder="Company"
-                                    class="custom-input"
-                                />
-                            </label>
-                        </div>
-                    </div>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-y-3 gap-x-5">
+                <div className="flex flex-col">
+                  <label className="block pb-2 font-bold text-sm text-gray-dark">
+                    City
+                  </label>
+                  <label className="custom-label">
+                    <input
+                      type="text"
+                      name="city"
+                      onChange={formik.handleChange}
+                      onBlur={handleBlur}
+                      value={formik.values.city}
+                      placeholder="City"
+                      className="custom-input"
+                    />
+                  </label>
+                  {errors.city && touched.city && (
+                    <p className="ml-4 mt-1 text-[#FF3333] font-bold karla text-sm">
+                      {errors.city}
+                    </p>
+                  )}
                 </div>
 
-                <div class="sidebar lg:basis-[calc((100%-20px)*(40/100))] xxl:basis-[524px] max-lg:pt-10">
-                    <div class="w-full px-4 py-8 md:p-6 xl:p-10 rounded-[20px] bg-orange-light text-white [&_*]:!text-white">
-                        <p class="title pb-8">Booking Details</p>
-
-                        <div class="leading-relaxed pb-8">
-                            <p class="title">Pick-up Details</p>
-                            <p>
-                                From: <span class="font-bold">Airport AAA</span>
-                            </p>
-                            <p>
-                                To:{" "}
-                                <span class="font-bold">Destination Name</span>
-                            </p>
-                            <p>
-                                Total: <span class="font-bold">9km</span>
-                            </p>
-                            <p>
-                                Date:{" "}
-                                <span class="font-bold">
-                                    23.05.2023 at 12:00 hrs
-                                </span>
-                            </p>
-                        </div>
-
-                        <div class="leading-relaxed pb-8 mb-10 border-b border-b-white">
-                            <p class="title">Car Class</p>
-                            <p class="font-bold">
-                                Sedan Standard
-                                <br />
-                                (Toyota Altis or similar)
-                            </p>
-                        </div>
-
-                        <ul class="[&>li]:flex [&>li]:justify-between [&>li]:items-center [&>li]:gap-2">
-                            <li>
-                                <span>Vehicle Subtotal: </span>
-                                <span>USD 45</span>
-                            </li>
-                            <li>
-                                <span>Premium Location Fee:</span>
-                                <span>USD 5</span>
-                            </li>
-                            <li class="title pt-3 max-sm:flex-col">
-                                <span>Your total price:</span>
-                                <span>USD 50</span>
-                            </li>
-                        </ul>
-
-                        <div class="pt-12 pb-8">
-                            <label class="relative block pl-11">
-                                <input
-                                    type="checkbox"
-                                    name=""
-                                    id=""
-                                    class="custom-input"
-                                />
-                                I Read and agree to term & conditions
-                            </label>
-                        </div>
-
-                        <div>
-                            <Link href={`/thank-you`}>
-                                <button class="btn-blue flex justify-between items-center w-full py-3 text-2xl">
-                                    <span>Continue to Payment</span>
-                                    <img
-                                        src="/assets/images/icons/ph_arrow-up-bold.svg"
-                                        alt="Icon"
-                                        class="[&amp;>path]:fill-blue-light"
-                                    />
-                                </button>
-                            </Link>
-                        </div>
-                    </div>
+                <div className="flex flex-col">
+                  <label className="block pb-2 font-bold text-sm text-gray-dark">
+                    State
+                  </label>
+                  <label className="custom-label">
+                    <input
+                      type="text"
+                      name="state"
+                      onChange={formik.handleChange}
+                      onBlur={handleBlur}
+                      value={formik.values.state}
+                      placeholder="State"
+                      className="custom-input"
+                    />
+                  </label>
+                  {errors.state && touched.state && (
+                    <p className="ml-4 mt-1 text-[#FF3333] font-bold karla text-sm">
+                      {errors.state}
+                    </p>
+                  )}
                 </div>
+
+                <div className="flex flex-col">
+                  <label className="block pb-2 font-bold text-sm text-gray-dark">
+                    Zip Code{" "}
+                  </label>
+                  <label className="custom-label">
+                    <input
+                      type="text"
+                      name="zip_code"
+                      onChange={formik.handleChange}
+                      onBlur={handleBlur}
+                      value={formik.values.zip_code}
+                      placeholder="Zip Code"
+                      className="custom-input"
+                    />
+                  </label>
+                  {errors.zip_code && touched.zip_code && (
+                    <p className="ml-4 mt-1 text-[#FF3333] font-bold karla text-sm">
+                      {errors.zip_code}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 pt-3 gap-4">
+                <div className="flex flex-col">
+                  <label className="block pb-2 font-bold text-sm text-gray-dark">
+                    Flight Number
+                  </label>
+                  <label className="custom-label w-full">
+                    <input
+                      type="text"
+                      name="flight_number"
+                      onChange={formik.handleChange}
+                      onBlur={handleBlur}
+                      value={formik.values.flight_number}
+                      placeholder="Flight Number"
+                      className="custom-input"
+                    />
+                  </label>
+                  {errors.flight_number && touched.flight_number && (
+                    <p className="ml-4 mt-1 text-[#FF3333] font-bold karla text-sm">
+                      {errors.flight_number}
+                    </p>
+                  )}
+                </div>
+                <div className="flex flex-col">
+                  <label className="block pb-2 font-bold text-sm text-gray-dark">
+                    Arrival Time
+                  </label>
+                  <TimeInput
+                    name="pickup_time"
+                    value={formik.values.pickup_time}
+                    onBlur={handleBlur}
+                    onChange={handleTimeChange}
+                    className="custom-label"
+                  />
+                  {errors.pickup_time && touched.pickup_time && (
+                    <p className="ml-4 mt-1 text-[#FF3333] font-bold karla text-sm">
+                      {errors.pickup_time}
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
+
+            <div className="sidebar lg:basis-[calc((100%-20px)*(40/100))] xxl:basis-[524px] max-lg:pt-10">
+              <div className="w-full px-4 py-8 md:p-6 xl:p-10 rounded-[20px] bg-orange-light text-white [&_*]:!text-white">
+                <CheckoutBookingDetails
+                  bookingDetails={relevantSchema}
+                  hotelAddress={hotelAddress}
+                  pickupDate={date}
+                />
+                <div className="pt-12 pb-8">
+                  <label className="relative block pl-11">
+                    <input
+                      type="checkbox"
+                      name=""
+                      id=""
+                      className="custom-input"
+                    />
+                    I Read and agree to term & conditions
+                  </label>
+                </div>
+                <div>
+                  <button
+                    type="submit"
+                    className="btn-blue flex justify-between items-center w-full py-3 text-2xl"
+                  >
+                    <span>Continue to Payment</span>
+                    <img
+                      src="/assets/images/icons/ph_arrow-up-bold.svg"
+                      alt="Icon"
+                      className="[&amp;>path]:fill-blue-light"
+                    />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
         </>
-    );
+      )}
+    </>
+  );
 };
 
 export default Checkout;
+
+export async function getServerSideProps(context) {
+  const { airport_id } = context.query;
+
+  const apiPath = process.env.NEXT_PUBLIC_API_PATH;
+
+  const thisAirport = await fetch(`${apiPath}/airports/${airport_id}`).then(
+    (res) => res.json()
+  );
+  const allSchema = await fetch(
+    `${apiPath}/price-schema?page=1&limit=9999999&sortBy=ASC`
+  ).then((res) => res.json());
+
+  const session = await getServerSession(context.req, context.res, authOptions);
+  if (!session) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+  const access_token = session.access_token;
+
+  return {
+    props: {
+      thisAirport,
+      allSchema,
+      access_token,
+    },
+  };
+}

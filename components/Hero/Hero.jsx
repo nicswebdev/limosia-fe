@@ -278,6 +278,8 @@ const Hero = ({ airportData, cheapestSchema }) => {
                     <div className="bg-[#F6F6F6] rounded-[100px] self-end py-2 px-5 flex flex-col w-[47%]">
                       <label className="karla text-[12px]">Date :</label>
                       <DateInput
+                        selectedDate={checkin}
+                        minDate={new Date()}
                         className="form-control karla font-bold text-[16px]"
                         handleDateChange={handleDateChange}
                       />
