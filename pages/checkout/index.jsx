@@ -14,8 +14,12 @@ import TimeInput from "@/components/CustomInputs/TimeInput";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]";
 import { generateRandomOrderId } from "@/utils/generateRandomOrderId";
+import { useSession } from "next-auth/react";
 
-const Checkout = ({ thisAirport, allSchema, access_token, carData }) => {
+const Checkout = ({ thisAirport, allSchema, carData }) => {
+  const { data: session, status } = useSession();
+  console.log(session);
+
   const router = useRouter();
   const { date, booking_type, hotel_place_id, guest_number } = router.query;
 
@@ -126,7 +130,7 @@ const Checkout = ({ thisAirport, allSchema, access_token, carData }) => {
         body: JSON.stringify(formData),
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${access_token}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
       });
       const resData = await res.json();
@@ -481,13 +485,13 @@ export async function getServerSideProps(context) {
       },
     };
   }
-  const access_token = session.access_token;
+  // const access_token = session.access_token;
 
   return {
     props: {
       thisAirport,
       allSchema,
-      access_token,
+      // access_token:,
       carData,
     },
   };
