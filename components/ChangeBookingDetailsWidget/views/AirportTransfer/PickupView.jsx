@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 
 const PickupView = (props) => {
   const router = useRouter();
-  const { currentAirportId, allAirportData, currentHotel } = props;
+  const { currentAirportId, allAirportData, currentHotel, date } = props;
 
   const [formData, setFormData] = useState({
     airport: currentAirportId,
@@ -13,8 +13,9 @@ const PickupView = (props) => {
       name: currentHotel?.name,
       place_id: currentHotel?.place_id,
     },
-    date: "",
+    date: new Date(date.getTime()-(8 * 60 * 60 * 1000)),
   });
+  console.log(formData.date)
 
   const handleDateChange = (value) => {
     setFormData((prev) => ({
@@ -125,6 +126,8 @@ const PickupView = (props) => {
             DATE
           </label>
           <DateInput
+            selectedDate={formData.date}
+            minDate={new Date()}
             className="flex flex-col bg-white text-xs leading-none text-gray-dark karla font-bold bg-[#F6F6F6] rounded-md p-2"
             handleDateChange={handleDateChange}
           />

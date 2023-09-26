@@ -5,9 +5,10 @@ import { useRouter } from "next/router";
 
 const ChangeBookingDetailsWidget = (props) => {
   const router = useRouter();
-  const { booking_type, airport_id, hotel_place_id } = router.query;
+  const { booking_type, airport_id, hotel_place_id, date } = router.query;
   const allAirportData = props.allAirportData;
   const [currentHotel, setCurrentHotel] = useState(null);
+
 
   useEffect(() => {
     const findHotelAddress = async () => {
@@ -36,6 +37,7 @@ const ChangeBookingDetailsWidget = (props) => {
           allAirportData={allAirportData}
           currentAirportId={airport_id}
           currentHotel={currentHotel}
+          date={new Date(date)}
         />
       )}
     </>
