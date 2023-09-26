@@ -26,6 +26,7 @@ const Checkout = ({ thisAirport, allSchema, access_token }) => {
     allSchema,
     hotel_place_id
   );
+  // console.log(relevantSchema)
 
   const hotelAddress = useFindHotelAddress(hotel_place_id);
 
@@ -87,7 +88,7 @@ const Checkout = ({ thisAirport, allSchema, access_token }) => {
         destination_point = relevantSchema.schema.airport.name;
       }
       // const pickup_date = new Date(date.getTime() - 8 * 60 * 60 * 1000);
-      const range = relevantSchema.range.value / 1000;
+      const range = relevantSchema.range.value;
       const total_price = relevantSchema.schema.base_price;
       const price_schema_name = relevantSchema.schema.tier_name;
       const car_class_name = relevantSchema.schema.car_class.name;
@@ -134,7 +135,7 @@ const Checkout = ({ thisAirport, allSchema, access_token }) => {
         alert("Internal Server Error");
         return;
       }
-      // router.push("/thank-you");
+      router.push(`/thank-you?order_id=${resData.id}`);
       return;
     },
   });
