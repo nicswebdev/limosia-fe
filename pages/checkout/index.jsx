@@ -87,7 +87,7 @@ const Checkout = ({ thisAirport, allSchema, access_token }) => {
         zip_code,
         pickup_point: relevantSchema.schema.airport.name,
         destination_point: hotel_place_id,
-        pickup_date: new Date(date),
+        pickup_date: new Date(date.getTime() - 8 * 60 * 60 * 1000),
         pickup_time,
         flight_number,
         total_guest: 0,
@@ -115,11 +115,11 @@ const Checkout = ({ thisAirport, allSchema, access_token }) => {
       const resData = await res.json();
       // console.log(resData);
       if (!res.ok) {
-        alert('Internal Server Error')
+        alert("Internal Server Error");
         return;
       }
-      router.push('/thank-you')
-      return
+      router.push("/thank-you");
+      return;
     },
   });
   const {
