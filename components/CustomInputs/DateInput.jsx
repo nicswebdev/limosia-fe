@@ -52,6 +52,7 @@ const DateInput = (props) => {
     const selectedDates = new Date(value);
     return (
       <input
+        readOnly
         onClick={onClick}
         ref={ref}
         id="checkins"
