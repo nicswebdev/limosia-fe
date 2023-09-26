@@ -18,6 +18,8 @@ const CarDetails = ({ carData, allSchema, allAirportData }) => {
     (item) => item.id == airport_id
   );
 
+  const checkoutLink = `/checkout?booking_type=${booking_type}&airport_id=${airport_id}&hotel_place_id=${hotel_place_id}&car_class_id=${car_class_id}&date=${date}`;
+
   //State to store hotel address
   const [hotelAddress, setHotelAddress] = useState("");
 
@@ -142,7 +144,7 @@ const CarDetails = ({ carData, allSchema, allAirportData }) => {
                   </span>
                 </div>
                 <div class="pt-12">
-                  <Link href="/checkout" class="btn-blue">
+                  <Link href={checkoutLink} class="btn-blue">
                     <span>ACCEPT RATE AND PAY NOW</span>
                   </Link>
                 </div>
