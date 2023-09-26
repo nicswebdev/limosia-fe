@@ -15,16 +15,16 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]";
 import { generateRandomOrderId } from "@/utils/generateRandomOrderId";
 
-const Checkout = ({ thisAirport, allSchema, access_token }) => {
+const Checkout = ({ thisAirport, allSchema, access_token, carData }) => {
   const router = useRouter();
-  const { date, car_class_id, airport_id, booking_type, hotel_place_id } =
-    router.query;
+  const { date, booking_type, hotel_place_id, guest_number } = router.query;
 
   const relevantSchema = useFindRelevantSchema(
-    car_class_id,
+    carData,
     thisAirport.place_id,
     allSchema,
-    hotel_place_id
+    hotel_place_id,
+    guest_number
   );
   // console.log(relevantSchema)
 
@@ -109,7 +109,7 @@ const Checkout = ({ thisAirport, allSchema, access_token }) => {
         pickup_date: new Date(new Date(date).getTime() - 8 * 60 * 60 * 1000),
         pickup_time,
         flight_number,
-        total_guest: 0,
+        total_guest: guest_number,
         total_suitcase: 0,
         car_class_name,
         airport_name,
@@ -453,7 +453,7 @@ const Checkout = ({ thisAirport, allSchema, access_token }) => {
 export default Checkout;
 
 export async function getServerSideProps(context) {
-  const { airport_id } = context.query;
+  const { airport_id, car_class_id } = context.query;
 
   const apiPath = process.env.NEXT_PUBLIC_API_PATH;
 
@@ -463,6 +463,14 @@ export async function getServerSideProps(context) {
   const allSchema = await fetch(
     `${apiPath}/price-schema?page=1&limit=9999999&sortBy=ASC`
   ).then((res) => res.json());
+
+  const res = await fetch(`${apiPath}/car-class/${car_class_id}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  const carData = await res.json();
 
   const session = await getServerSession(context.req, context.res, authOptions);
   if (!session) {
@@ -480,6 +488,7 @@ export async function getServerSideProps(context) {
       thisAirport,
       allSchema,
       access_token,
+      carData,
     },
   };
 }

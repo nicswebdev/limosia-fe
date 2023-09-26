@@ -1,10 +1,19 @@
-export const getRelevantSchema = (priceSchema, airportPlaceId, carClassId, distanceValue) => {
+export const getRelevantSchema = (
+  priceSchema,
+  airportPlaceId,
+  carClass,
+  distanceValue,
+  guest
+) => {
   const place_id = airportPlaceId;
+  const carClassId = carClass.id;
 
   // Step 1: Filter items based on place_id and car_class id
   const filteredItems = priceSchema.items.filter(
     (item) =>
-      item.airport.place_id == place_id && item.car_class.id == carClassId
+      item.airport.place_id == place_id &&
+      item.car_class.id == carClassId &&
+      guest <= carClass.max_guest
   );
 
   // Step 2: Find an item where distance is between from_range_km and to_range_km

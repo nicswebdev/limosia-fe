@@ -15,7 +15,7 @@ const AirportTransferForm = (props) => {
       name: "",
       place_id: "",
     },
-    passenger: 0,
+    passenger: 2,
     date: new Date(),
   });
 
@@ -83,7 +83,7 @@ const AirportTransferForm = (props) => {
     }
     const orderType = airportTab;
     router.push(
-      `/car-class?booking_type=${orderType}&airport_id=${airportTransferData.airport}&hotel_place_id=${airportTransferData.hotel.place_id}&date=${airportTransferData.date}`
+      `/car-class?booking_type=${orderType}&airport_id=${airportTransferData.airport}&hotel_place_id=${airportTransferData.hotel.place_id}&date=${airportTransferData.date}&guest_number=${airportTransferData.passenger}`
     );
     // console.log(airportTransferData);
   };
@@ -114,11 +114,18 @@ const AirportTransferForm = (props) => {
         </div>
         <div className="bg-[#F6F6F6] rounded-[100px] self-end py-2 px-5 flex flex-col w-[47%]">
           <label className="karla text-[12px]">Passenger :</label>
-          <select className="form-control karla font-bold text-[16px]">
+          <select
+            value={airportTransferData.passenger}
+            className="form-control karla font-bold text-[16px]"
+            onChange={(event) => {
+              setAirportTransferData((prev) => ({
+                ...prev,
+                passenger: event.target.value,
+              }));
+            }}
+          >
             <option value="1">1</option>
-            <option value="2" selected>
-              2
-            </option>
+            <option value="2">2</option>
             <option value="3">3</option>
             <option value="4">4</option>
             <option value="5">5</option>

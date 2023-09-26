@@ -3,10 +3,11 @@ import useFindRange from "./useFindRange";
 import { getRelevantSchema } from "@/utils/getRelevantSchema";
 
 export const useFindRelevantSchema = (
-  carClassId,
+  carClass,
   airportPlaceId,
   priceSchema,
-  hotelPlaceId
+  hotelPlaceId,
+  guest
 ) => {
   const [relevantSchema, setRelevantSchema] = useState(null);
   const range = useFindRange(airportPlaceId, hotelPlaceId);
@@ -19,9 +20,14 @@ export const useFindRelevantSchema = (
     const schema = getRelevantSchema(
       priceSchema,
       airportPlaceId,
-      carClassId,
-      range.value
+      carClass,
+      range.value,
+      guest
     );
+    if (!schema) {
+      window.location.href = "/error";
+      return;
+    }
     // console.log(schema)
     setRelevantSchema({
       schema,
