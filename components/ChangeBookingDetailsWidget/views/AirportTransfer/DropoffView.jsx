@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 
 const DropoffView = (props) => {
   const router = useRouter();
-  const { currentAirportId, allAirportData, currentHotel } = props;
+  const { currentAirportId, allAirportData, currentHotel, date } = props;
 
   const [formData, setFormData] = useState({
     airport: currentAirportId,

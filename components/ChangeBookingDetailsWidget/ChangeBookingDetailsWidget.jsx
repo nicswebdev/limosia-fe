@@ -9,9 +9,6 @@ const ChangeBookingDetailsWidget = (props) => {
   const allAirportData = props.allAirportData;
   const [currentHotel, setCurrentHotel] = useState(null);
 
-  console.log(date);
-
-  // date = date.replace(/-/g, '\/').replace(/T.+/, '')
 
   useEffect(() => {
     const findHotelAddress = async () => {
