@@ -13,6 +13,7 @@ import TimePicker from "react-time-picker";
 import TimeInput from "@/components/CustomInputs/TimeInput";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]";
+import { generateRandomOrderId } from "@/utils/generateRandomOrderId";
 
 const Checkout = ({ thisAirport, allSchema, access_token }) => {
   const router = useRouter();
@@ -75,8 +76,25 @@ const Checkout = ({ thisAirport, allSchema, access_token }) => {
       },
       { setErrors }
     ) => {
+      let pickup_point = "";
+      let destination_point = "";
+      if (booking_type === "airportpickup") {
+        pickup_point = relevantSchema.schema.airport.name;
+        destination_point = hotelAddress;
+      }
+      if (booking_type === "airportdropoff") {
+        pickup_point = hotelAddress;
+        destination_point = relevantSchema.schema.airport.name;
+      }
+      // const pickup_date = new Date(date.getTime() - 8 * 60 * 60 * 1000);
+      const range = relevantSchema.range.value / 1000;
+      const total_price = relevantSchema.schema.base_price;
+      const price_schema_name = relevantSchema.schema.tier_name;
+      const car_class_name = relevantSchema.schema.car_class.name;
+      const airport_name = relevantSchema.schema.airport.name;
+      const order_no = generateRandomOrderId(f_name);
       const formData = {
-        order_no: "A1",
+        order_no,
         f_name,
         l_name,
         phone,
@@ -85,24 +103,22 @@ const Checkout = ({ thisAirport, allSchema, access_token }) => {
         city,
         state,
         zip_code,
-        pickup_point: relevantSchema.schema.airport.name,
-        destination_point: hotel_place_id,
-        pickup_date: new Date(date.getTime() - 8 * 60 * 60 * 1000),
+        pickup_point,
+        destination_point,
+        pickup_date: new Date(new Date(date).getTime() - 8 * 60 * 60 * 1000),
         pickup_time,
         flight_number,
         total_guest: 0,
         total_suitcase: 0,
-        car_class_name: car_class_id,
-        airport_name: relevantSchema.schema.airport.name,
-        range: relevantSchema.range.value / 1000,
-        total_price: relevantSchema.schema.base_price,
-        price_schema_name: relevantSchema.schema.tier_name,
+        car_class_name,
+        airport_name,
+        range,
+        total_price,
+        price_schema_name,
         order_currency: "THB",
         payment_status_id: 1,
         order_status_id: 1,
       };
-      console.log(formData);
-
       const apiPath = process.env.NEXT_PUBLIC_API_PATH;
       const res = await fetch(`${apiPath}/orders`, {
         method: "POST",
@@ -113,12 +129,12 @@ const Checkout = ({ thisAirport, allSchema, access_token }) => {
         },
       });
       const resData = await res.json();
-      // console.log(resData);
+      console.log(resData);
       if (!res.ok) {
         alert("Internal Server Error");
         return;
       }
-      router.push("/thank-you");
+      // router.push("/thank-you");
       return;
     },
   });
