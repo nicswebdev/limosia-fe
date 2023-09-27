@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 
 const DropoffView = (props) => {
   const router = useRouter();
-  const { currentAirportId, allAirportData, currentHotel } = props;
+  const { currentAirportId, allAirportData, currentHotel, date } = props;
 
   const [formData, setFormData] = useState({
     airport: currentAirportId,
@@ -13,7 +13,7 @@ const DropoffView = (props) => {
       name: currentHotel?.name,
       place_id: currentHotel?.place_id,
     },
-    date: "",
+    date: new Date(date.getTime() - 8 * 60 * 60 * 1000),
   });
 
   const handleDateChange = (value) => {
@@ -50,9 +50,9 @@ const DropoffView = (props) => {
   };
   const handleChangeBookingSubmit = () => {
     // console.log(formData);
-    const { booking_type, car_class_id } = router.query;
+    const { booking_type, guest_number } = router.query;
     // const newDate = unfixedDate;
-    const newLink = `/car-class?booking_type=${booking_type}&airport_id=${formData.airport}&hotel_place_id=${formData.hotel.place_id}&car_class_id=${car_class_id}&date=${formData.date}`;
+    const newLink = `/car-class?booking_type=${booking_type}&airport_id=${formData.airport}&hotel_place_id=${formData.hotel.place_id}&date=${formData.date}&guest_number=${guest_number}`;
     router.push(newLink);
   };
   useEffect(() => {
@@ -125,6 +125,8 @@ const DropoffView = (props) => {
             DATE
           </label>
           <DateInput
+            selectedDate={formData.date}
+            minDate={new Date()}
             className="flex flex-col bg-white text-xs leading-none text-gray-dark karla font-bold bg-[#F6F6F6] rounded-md p-2"
             handleDateChange={handleDateChange}
           />

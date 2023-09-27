@@ -4,23 +4,24 @@ import ReactDatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 const DateInput = (props) => {
-  const { handleDateChange, className } = props;
+  const {
+    handleDateChange,
+    className,
+    minDate,
+    maxDate,
+    scrollableYearDropdown,
+    yearDropdownItemNumber,
+    showYearDropdown,
+    currentDate,
+  } = props;
   const today = new Date();
   const tomorrow = new Date(today);
   const router = useRouter();
-  const { date } = router.query;
-  const [unfixedDate, setUnfixedDate] = useState(new Date());
+  const selectedDate = props.selectedDate;
 
-  useEffect(() => {
-    if (!date) {
-      return;
-    }
-    setUnfixedDate(new Date(date));
-  }, [date]);
-
-  useEffect(() => {
-    handleDateChange(unfixedDate);
-  }, [unfixedDate]);
+  // useEffect(() => {
+  //   handleDateChange(unfixedDate);
+  // }, [unfixedDate]);
 
   const [checkout, setCheckout] = useState(tomorrow);
   const monthNames = [
@@ -42,26 +43,26 @@ const DateInput = (props) => {
     const tomorrow = new Date(value);
     tomorrow.setDate(tomorrow.getDate() + 1);
     setCheckout(tomorrow);
-    console.log(checkout);
   };
 
   const ArrivalCustomInput = forwardRef(function MyInput(
     { value, onClick },
     ref
   ) {
-    const selectedDate = new Date(value);
+    const selectedDates = new Date(value);
     return (
       <input
+        readOnly
         onClick={onClick}
         ref={ref}
         id="checkins"
         type="text"
         value={
-          selectedDate.getDate() +
+          selectedDates.getUTCDate() +
           ` ` +
-          monthNames[selectedDate.getMonth()] +
+          monthNames[selectedDates.getUTCMonth()] +
           ` ` +
-          selectedDate.getFullYear()
+          selectedDates.getUTCFullYear()
         }
         className={className}
       />
@@ -70,12 +71,16 @@ const DateInput = (props) => {
   return (
     //   Date Field
     <ReactDatePicker
-      selected={unfixedDate}
+      selected={selectedDate}
       dateFormat="yyyy-MM-dd"
-      onChange={(date) => setUnfixedDate(date)}
+      onChange={(date) => handleDateChange(date)}
       onSelect={handleDateSelect}
-      minDate={today}
+      minDate={minDate}
+      maxDate={maxDate}
       customInput={<ArrivalCustomInput />}
+      showYearDropdown={showYearDropdown}
+      scrollableYearDropdown={scrollableYearDropdown}
+      yearDropdownItemNumber={yearDropdownItemNumber}
     />
   );
 };

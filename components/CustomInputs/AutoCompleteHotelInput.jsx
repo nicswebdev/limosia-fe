@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 const AutoCompleteHotelInput = (props) => {
   const { className, changeSearchHotel, value, onChange } = props;
   const autocompleteOriginRef = useRef("");
+  const [focused, setFocused] = useState(false);
 
   useEffect(() => {
     const initAutoComplete = async () => {
@@ -22,7 +23,7 @@ const AutoCompleteHotelInput = (props) => {
           alert("Please select a hotel");
           autocompleteOriginRef.current.value = "";
         } else {
-          console.log(place);
+          // console.log(place);
           changeSearchHotel(place?.name, place?.place_id);
         }
       });
@@ -31,10 +32,14 @@ const AutoCompleteHotelInput = (props) => {
     if (window.google && window.google.maps) {
       initAutoComplete();
     }
-  }, []);
+  }, [focused]);
 
   return (
     <input
+      onFocus={() => {
+        setFocused(true);
+      }}
+      placeholder="Enter a location"
       value={value}
       onChange={onChange}
       className={className}

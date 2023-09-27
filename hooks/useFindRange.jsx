@@ -23,7 +23,7 @@ function useFindRange(airportPlaceId, hotelPlaceId) {
               duration: route.duration.text,
             });
           } else {
-            alert("Directions request failed due to " + status);
+            window.location.href = "/error";
             // console.error("Directions request failed", response);
           }
         }
