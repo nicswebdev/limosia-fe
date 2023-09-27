@@ -28,7 +28,7 @@ const AirportTransferForm = (props) => {
         name: "",
         place_id: "",
       },
-      passenger: "",
+      passenger: 2,
       date: new Date(),
     });
   };
