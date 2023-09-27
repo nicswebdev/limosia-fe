@@ -50,7 +50,7 @@ const DropoffView = (props) => {
   };
   const handleChangeBookingSubmit = () => {
     // console.log(formData);
-    const { booking_type } = router.query;
+    const { booking_type, guest_number } = router.query;
     // const newDate = unfixedDate;
     const newLink = `/car-class?booking_type=${booking_type}&airport_id=${formData.airport}&hotel_place_id=${formData.hotel.place_id}&date=${formData.date}&guest_number=${guest_number}`;
     router.push(newLink);
