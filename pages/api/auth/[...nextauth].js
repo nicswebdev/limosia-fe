@@ -71,20 +71,22 @@ export const authOptions = {
             headers: { "Content-Type": "application/json" },
           });
           const data = await res.json();
-          return {access_token: data.access_token };
+          console.log(data);
+          return { user: data.user, access_token: data.access_token };
         }
+        // console.log(user);
         return {
+          user: user.user,
           access_token: user.token.access_token,
-          // id:user.user.email
         };
       }
       return token;
     },
 
     async session({ session, token }) {
-      session.access_token = token.access_token;
-      // console.log(session);
-      return session;
+      session = { token };
+      console.log(session.token);
+      return session.token;
     },
   },
 };

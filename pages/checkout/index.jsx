@@ -93,7 +93,7 @@ const Checkout = ({ thisAirport, allSchema, carData }) => {
       }
       // const pickup_date = new Date(date.getTime() - 8 * 60 * 60 * 1000);
       const range = relevantSchema.range.value;
-      const total_price = relevantSchema.schema.base_price;
+      const total_price = relevantSchema.schema.refundable_base_price_1;
       const price_schema_name = relevantSchema.schema.tier_name;
       const car_class_name = relevantSchema.schema.car_class.name;
       const airport_name = relevantSchema.schema.airport.name;
