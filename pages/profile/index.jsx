@@ -9,7 +9,7 @@ import * as Yup from "yup";
 import DateInput from "@/components/CustomInputs/DateInput";
 
 const Profile = ({ profileData }) => {
-  console.log(profileData);
+  // console.log(profileData);
 
   const validationSchema = Yup.object().shape({
     f_name: Yup.string().required("First Name is required"),

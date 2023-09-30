@@ -18,10 +18,11 @@ import { useSession } from "next-auth/react";
 
 const Checkout = ({ thisAirport, allSchema, carData }) => {
   const { data: session, status } = useSession();
-  console.log(session);
+  // console.log(session);
 
   const router = useRouter();
-  const { date, booking_type, hotel_place_id, guest_number } = router.query;
+  const { date, booking_type, hotel_place_id, guest_number, car_class_id } =
+    router.query;
 
   const relevantSchema = useFindRelevantSchema(
     carData,
@@ -123,6 +124,7 @@ const Checkout = ({ thisAirport, allSchema, carData }) => {
         order_currency: "THB",
         payment_status_id: 1,
         order_status_id: 1,
+        car_class_id: Number(car_class_id),
       };
       const apiPath = process.env.NEXT_PUBLIC_API_PATH;
       const res = await fetch(`${apiPath}/orders`, {

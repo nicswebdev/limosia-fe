@@ -6,6 +6,8 @@ import { getServerSession } from "next-auth";
 import BookingCard from "@/components/BookingCard";
 
 const Dashboard = ({ bookingData, userData }) => {
+  // console.log(bookingData)
+  // return
   return (
     <>
       <Head>

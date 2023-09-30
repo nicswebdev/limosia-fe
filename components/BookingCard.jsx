@@ -43,7 +43,7 @@ const BookingCard = (props) => {
       <div className="car-card">
         <div className="image-wrap md:!basis-1/4">
           <img
-            src="./assets/images/cars/car-2.png"
+            src={bookingData.car_class.image}
             alt="Car"
             className="max-w-full px-2"
           />
@@ -51,7 +51,9 @@ const BookingCard = (props) => {
 
         <div className="detail-wrap">
           <p className="title">{bookingData?.car_class_name}</p>
-          {/* <p className="font-bold text-gray-dark">(Toyota Altis or similar)</p> */}
+          <p className="font-bold text-gray-dark">
+            {bookingData.car_class.description}
+          </p>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-2 gap-y-5 pt-5">
             <div className="flex items-center gap-5">
@@ -98,7 +100,7 @@ const BookingCard = (props) => {
               <div>
                 <p className="font-bold text-xs text-black">From</p>
                 <p className="text-xs text-gray-dark">
-                  {bookingData.pickup_point}
+                  {bookingData.pickup_point.slice(0, 20) + "..."}
                 </p>
               </div>
             </div>
@@ -111,8 +113,8 @@ const BookingCard = (props) => {
               />
               <div>
                 <p className="font-bold text-xs text-black">To</p>
-                <p className="text-xs text-gray-dark truncate w-[15%]">
-                  {bookingData.destination_point}
+                <p className="text-xs text-gray-dark">
+                  {bookingData.destination_point.slice(0, 20) + "..."}
                 </p>
               </div>
             </div>
