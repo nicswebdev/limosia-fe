@@ -6,6 +6,7 @@ import { useEffect } from "react";
 const raleway = Raleway({ subsets: ["latin"] });
 const karla = Karla({ subsets: ["latin"] });
 import { SessionProvider } from "next-auth/react";
+import './timepicker.css'
 
 export default function App({
   Component,

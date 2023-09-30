@@ -10,13 +10,15 @@ import LoadingPage from "@/components/LoadingPage";
 const CarDetails = ({ carData, allSchema, allAirportData }) => {
   //Get query params
   const router = useRouter();
-  const { date, car_class_id, airport_id, booking_type, hotel_place_id } =
+  const { date, car_class_id, airport_id, booking_type, hotel_place_id, guest_number } =
     router.query;
   const selectedCar = carData;
   //Find this airport from all airport data, all airport data is needed to change details
   const thisAirport = allAirportData.items.find(
     (item) => item.id == airport_id
   );
+
+  const checkoutLink = `/checkout?booking_type=${booking_type}&airport_id=${airport_id}&hotel_place_id=${hotel_place_id}&car_class_id=${car_class_id}&date=${date}&guest_number=${guest_number}`;
 
   //State to store hotel address
   const [hotelAddress, setHotelAddress] = useState("");
@@ -36,10 +38,11 @@ const CarDetails = ({ carData, allSchema, allAirportData }) => {
 
   // const distance = useFindRange(thisAirport.place_id, hotel_place_id)
   const relevantSchema = useFindRelevantSchema(
-    car_class_id,
+    carData,
     thisAirport.place_id,
     allSchema,
-    hotel_place_id
+    hotel_place_id,
+    guest_number
   );
 
   return (
@@ -142,7 +145,7 @@ const CarDetails = ({ carData, allSchema, allAirportData }) => {
                   </span>
                 </div>
                 <div class="pt-12">
-                  <Link href="/checkout" class="btn-blue">
+                  <Link href={checkoutLink} class="btn-blue">
                     <span>ACCEPT RATE AND PAY NOW</span>
                   </Link>
                 </div>

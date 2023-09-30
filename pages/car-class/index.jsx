@@ -10,11 +10,13 @@ import React, { useEffect, useRef, useState } from "react";
 
 const CarClass = ({ carClassData, priceSchema, allAirportData }) => {
   const router = useRouter();
-  const { hotel_place_id, booking_type, date, airport_id } = router.query;
-  
+  const { hotel_place_id, booking_type, date, airport_id, guest_number } =
+    router.query;
+
   const thisAirport = allAirportData.items.find(
     (item) => item.id == airport_id
   );
+
   const airport_place_id = thisAirport.place_id;
 
   const { data: session } = useSession();
@@ -80,12 +82,14 @@ const CarClass = ({ carClassData, priceSchema, allAirportData }) => {
           <ChangeBookingDetailsWidget allAirportData={allAirportData} />
           <div class="flex flex-col gap-8">
             {carClassData.items.map((item, index) => {
+              // console.log(item)
               //Get the relevant schema for car class, airport, and range
               const relevantSchema = getRelevantSchema(
                 priceSchema,
                 airport_place_id,
-                item.id,
-                range?.value
+                item,
+                range?.value,
+                guest_number
               );
               //if no relevant schema for this car class return
               if (relevantSchema === null) {
@@ -146,7 +150,7 @@ const CarClass = ({ carClassData, priceSchema, allAirportData }) => {
                         <button
                           onClick={() => {
                             // Generate booklink to details after select car
-                            const booklink = `/car-details?booking_type=${booking_type}&airport_id=${relevantSchema.airport.id}&hotel_place_id=${hotel_place_id}&car_class_id=${item.id}&date=${date}`;
+                            const booklink = `/car-details?booking_type=${booking_type}&airport_id=${relevantSchema.airport.id}&hotel_place_id=${hotel_place_id}&car_class_id=${item.id}&date=${date}&guest_number=${guest_number}`;
                             if (session) {
                               window.location.href = booklink;
                               return;
@@ -173,7 +177,7 @@ const CarClass = ({ carClassData, priceSchema, allAirportData }) => {
 
 export default CarClass;
 
-export async function getServerSideProps() {
+export async function getServerSideProps(context) {
   const apiPath = process.env.NEXT_PUBLIC_API_PATH;
   const carClassData = await fetch(
     `${apiPath}/car-class?page=1&limit=10&sortBy=ASC`
