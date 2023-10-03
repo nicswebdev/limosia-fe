@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 const ChangeBookingDetailsWidget = (props) => {
   const router = useRouter();
   const { booking_type, airport_id, hotel_place_id, date } = router.query;
+  // console.log(date)
   const allAirportData = props.allAirportData;
   const [currentHotel, setCurrentHotel] = useState(null);
 
@@ -37,7 +38,7 @@ const ChangeBookingDetailsWidget = (props) => {
           allAirportData={allAirportData}
           currentAirportId={airport_id}
           currentHotel={currentHotel}
-          date={new Date(date)}
+          date={date}
         />
       )}
     </>

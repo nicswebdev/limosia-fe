@@ -12,18 +12,12 @@ const DateInput = (props) => {
     scrollableYearDropdown,
     yearDropdownItemNumber,
     showYearDropdown,
-    currentDate,
+    selectedDate,
   } = props;
-  const today = new Date();
-  const tomorrow = new Date(today);
-  const router = useRouter();
-  const selectedDate = props.selectedDate;
+  // console.log(selectedDate)
+  // const selectedDateObject = new Date(selectedDate);
+  // console.log(selectedDateObject)
 
-  // useEffect(() => {
-  //   handleDateChange(unfixedDate);
-  // }, [unfixedDate]);
-
-  const [checkout, setCheckout] = useState(tomorrow);
   const monthNames = [
     "Jan",
     "Feb",
@@ -38,12 +32,6 @@ const DateInput = (props) => {
     "Nov",
     "Dec",
   ];
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const handleDateSelect = (value) => {
-    const tomorrow = new Date(value);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    setCheckout(tomorrow);
-  };
 
   const ArrivalCustomInput = forwardRef(function MyInput(
     { value, onClick },
@@ -74,7 +62,7 @@ const DateInput = (props) => {
       selected={selectedDate}
       dateFormat="yyyy-MM-dd"
       onChange={(date) => handleDateChange(date)}
-      onSelect={handleDateSelect}
+      // onSelect={handleDateSelect}
       minDate={minDate}
       maxDate={maxDate}
       customInput={<ArrivalCustomInput />}

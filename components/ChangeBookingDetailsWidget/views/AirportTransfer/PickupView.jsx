@@ -13,9 +13,9 @@ const PickupView = (props) => {
       name: currentHotel?.name,
       place_id: currentHotel?.place_id,
     },
-    date: new Date(date.getTime()-(8 * 60 * 60 * 1000)),
+    date: new Date(date),
   });
-  console.log(formData.date)
+  // console.log(new Date(formData.date.toLocaleString('en-US', { timeZone: 'Asia/Jakarta' })));
 
   const handleDateChange = (value) => {
     setFormData((prev) => ({
@@ -52,12 +52,16 @@ const PickupView = (props) => {
     // console.log(formData);
     const { booking_type, guest_number } = router.query;
     // const newDate = unfixedDate;
-    const newLink = `/car-class?booking_type=${booking_type}&airport_id=${formData.airport}&hotel_place_id=${formData.hotel.place_id}&date=${formData.date}&guest_number=${guest_number}`;
+    const newLink = `/car-class?booking_type=${booking_type}&airport_id=${
+      formData.airport
+    }&hotel_place_id=${
+      formData.hotel.place_id
+    }&date=${formData.date.toISOString()}&guest_number=${guest_number}`;
     router.push(newLink);
   };
-  useEffect(() => {
-    console.log(formData.hotel);
-  }, [formData.hotel]);
+  // useEffect(() => {
+  //   console.log(formData.hotel);
+  // }, [formData.hotel]);
   return (
     <form className="flex flex-col md:flex-row max-md:gap-4 justify-between md:items-center px-4 md:px-8 py-4 mb-5 rounded-[0.625rem] box-shadow bg-gray-light">
       {/* Origin */}

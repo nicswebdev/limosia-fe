@@ -4,20 +4,28 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { authOptions } from "../api/auth/[...nextauth]";
 import { useRouter } from "next/router";
-import { useFindRelevantSchema } from "@/hooks/useFindRelevantSchema";
 import LoadingPage from "@/components/LoadingPage";
+import useFindRange from "@/hooks/useFindRange";
+import useFindSingleRelevantSchema from "@/hooks/useFindSingleRelevantSchema";
+import { formatPrice } from "@/utils/formatPrice";
 
-const CarDetails = ({ carData, allSchema, allAirportData }) => {
+const CarDetails = ({ allAirportData }) => {
   //Get query params
   const router = useRouter();
-  const { date, car_class_id, airport_id, booking_type, hotel_place_id, guest_number } =
-    router.query;
-  const selectedCar = carData;
+  const {
+    date,
+    car_class_id,
+    airport_id,
+    booking_type,
+    hotel_place_id,
+    guest_number,
+    selected_price,
+  } = router.query;
+
   //Find this airport from all airport data, all airport data is needed to change details
   const thisAirport = allAirportData.items.find(
     (item) => item.id == airport_id
   );
-
   const checkoutLink = `/checkout?booking_type=${booking_type}&airport_id=${airport_id}&hotel_place_id=${hotel_place_id}&car_class_id=${car_class_id}&date=${date}&guest_number=${guest_number}`;
 
   //State to store hotel address
@@ -36,21 +44,49 @@ const CarDetails = ({ carData, allSchema, allAirportData }) => {
     }
   }, [hotel_place_id]);
 
-  // const distance = useFindRange(thisAirport.place_id, hotel_place_id)
-  const relevantSchema = useFindRelevantSchema(
-    carData,
-    thisAirport.place_id,
-    allSchema,
-    hotel_place_id,
-    guest_number
+  const range = useFindRange(thisAirport.place_id, hotel_place_id);
+  const { relevantSchema, relevantSchemaLoading } = useFindSingleRelevantSchema(
+    airport_id,
+    car_class_id,
+    range,
+    date
   );
+  // console.log(relevantSchema);
+
+  const {
+    image,
+    name,
+    description,
+    relevant_refundable_price,
+    relevant_non_refundable_price,
+  } = relevantSchema;
+
+  // console.log(relevantSchema)
+
+  const PriceDisplay = {
+    refundable: () => {
+      return (
+        <span class="title">
+          {`THB ${formatPrice(relevant_refundable_price)}`} (refundable)
+        </span>
+      );
+    },
+    nonRefundable: () => {
+      return (
+        <span class="title">
+          {`THB ${formatPrice(relevant_non_refundable_price)}`} (non-refundable)
+        </span>
+      );
+    },
+  };
+  const CurrentSelectedPrice = PriceDisplay[selected_price];
 
   return (
     <>
       <Head>
         <title>Quicco - Car Details</title>
       </Head>
-      {!relevantSchema ? (
+      {relevantSchemaLoading ? (
         <LoadingPage />
       ) : (
         <>
@@ -72,7 +108,7 @@ const CarDetails = ({ carData, allSchema, allAirportData }) => {
             <div class="sidebar">
               {/* This is the car image */}
               <div class="flex justify-center items-center w-full px-5 py-8 mb-9 rounded-[15px] bg-gray-light">
-                <img src={selectedCar.image} alt="Car" class="max-w-full" />
+                <img src={image} alt="Car" class="max-w-full" />
               </div>
             </div>
 
@@ -81,10 +117,8 @@ const CarDetails = ({ carData, allSchema, allAirportData }) => {
 
               <div className="px-4 py-8 md:p-6 xl:p-10 rounded-[15px] box-shadow text-black-2">
                 <p className="title">Vehicle</p>
-                <p className="font-bold text-black">{selectedCar.name}</p>
-                <p className="font-medium text-gray-dark">
-                  {selectedCar.description}
-                </p>
+                <p className="font-bold text-black">{name}</p>
+                <p className="font-medium text-gray-dark">{description}</p>
 
                 <div className="leading-relaxed mt-4">
                   <p className="title">Pick-up Details</p>
@@ -107,12 +141,16 @@ const CarDetails = ({ carData, allSchema, allAirportData }) => {
                   <p>
                     Total:{" "}
                     <span className="font-medium text-gray-dark">
-                      {relevantSchema?.range.text}
+                      {range?.text}
                     </span>
                   </p>
                   <p>
                     Date:{" "}
-                    <span className="font-medium text-gray-dark">{date}</span>
+                    <span className="font-medium text-gray-dark">{`${new Date(
+                      date
+                    ).getDate()} - ${
+                      new Date(date).getMonth() + 1
+                    } - ${new Date(date).getFullYear()}`}</span>
                   </p>
                 </div>
 
@@ -120,13 +158,7 @@ const CarDetails = ({ carData, allSchema, allAirportData }) => {
 
                 <div class="flex justify-between items-center">
                   <span class="text-gray-dark">Vehicle Subtotal: </span>
-                  <span class="font-bold">
-                    {`THB ${new Intl.NumberFormat("en-US").format(
-                      relevantSchema
-                        ? relevantSchema.schema.base_price
-                        : "Loading Price..."
-                    )}`}
-                  </span>
+                  <CurrentSelectedPrice />
                 </div>
 
                 <div class="flex justify-between items-center">
@@ -136,13 +168,7 @@ const CarDetails = ({ carData, allSchema, allAirportData }) => {
 
                 <div class="flex max-sm:flex-col justify-between sm:items-center pt-5">
                   <span class="title">Your total price:</span>
-                  <span class="title">
-                    {`THB ${new Intl.NumberFormat("en-US").format(
-                      relevantSchema
-                        ? relevantSchema.schema.base_price
-                        : "Loading Price..."
-                    )}`}
-                  </span>
+                  <CurrentSelectedPrice />
                 </div>
                 <div class="pt-12">
                   <Link href={checkoutLink} class="btn-blue">
@@ -162,7 +188,7 @@ export default CarDetails;
 
 export async function getServerSideProps(context) {
   const session = await getServerSession(context.req, context.res, authOptions);
-  // console.log(session);
+  console.log(session);
   if (!session) {
     return {
       redirect: {
@@ -172,21 +198,7 @@ export async function getServerSideProps(context) {
     };
   }
 
-  const { car_class_id } = context.query;
-
   const apiPath = process.env.NEXT_PUBLIC_API_PATH;
-  const res = await fetch(`${apiPath}/car-class/${car_class_id}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${session.access_token}`,
-    },
-  });
-  const carData = await res.json();
-
-  const allSchema = await fetch(
-    `${apiPath}/price-schema?page=1&limit=9999999&sortBy=ASC`
-  ).then((res) => res.json());
 
   const allAirportData = await fetch(
     `${apiPath}/airports?page=1&limit=9999999&sortBy=ASC`
@@ -194,9 +206,6 @@ export async function getServerSideProps(context) {
 
   return {
     props: {
-      session: JSON.parse(JSON.stringify(session)),
-      carData,
-      allSchema,
       allAirportData,
     },
   };

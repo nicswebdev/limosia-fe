@@ -83,7 +83,7 @@ const AirportTransferForm = (props) => {
     }
     const orderType = airportTab;
     router.push(
-      `/car-class?booking_type=${orderType}&airport_id=${airportTransferData.airport}&hotel_place_id=${airportTransferData.hotel.place_id}&date=${airportTransferData.date}&guest_number=${airportTransferData.passenger}`
+      `/car-class?booking_type=${orderType}&airport_id=${airportTransferData.airport}&hotel_place_id=${airportTransferData.hotel.place_id}&date=${airportTransferData.date.toISOString()}&guest_number=${airportTransferData.passenger}`
     );
     // console.log(airportTransferData);
   };

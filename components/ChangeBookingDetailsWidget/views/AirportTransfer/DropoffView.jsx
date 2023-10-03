@@ -13,7 +13,7 @@ const DropoffView = (props) => {
       name: currentHotel?.name,
       place_id: currentHotel?.place_id,
     },
-    date: new Date(date.getTime() - 8 * 60 * 60 * 1000),
+    date: new Date(date),
   });
 
   const handleDateChange = (value) => {
