@@ -7,25 +7,75 @@ import { formatPrice } from "@/utils/formatPrice";
 const CheckoutBookingDetails = (props) => {
   const { bookingDetails, hotelAddress, pickupDate } = props;
 
-  const { range, schema } = bookingDetails;
-
+  const {
+    range,
+    airport_name,
+    car_class_name,
+    car_class_description,
+    relevant_refundable_price,
+    relevant_non_refundable_price,
+  } = bookingDetails;
   const router = useRouter();
 
-  const { booking_type } = router.query;
+  const { booking_type, selected_price } = router.query;
   const pickupDetailsView = {
     airportpickup: PickupDetailsAirportPickup,
     airportdropoff: PickupDetailsAirportDropoff,
   };
   const CurrentPickupDetailsView = pickupDetailsView[booking_type];
-
-
+  const PriceView = {
+    refundable: () => {
+      return (
+        <ul className="[&>li]:flex [&>li]:justify-between [&>li]:items-center [&>li]:gap-2">
+          <li>
+            <span>Vehicle Subtotal: </span>
+            <span>{`THB ${formatPrice(
+              relevant_refundable_price
+            )} (refundable)`}</span>
+          </li>
+          <li>
+            <span>Tax:</span>
+            <span>USD 0</span>
+          </li>
+          <li className="text-base font-semibold pt-3 max-sm:flex-col">
+            <span>Your total price:</span>
+            <span>{`THB ${formatPrice(
+              relevant_refundable_price
+            )} (refundable)`}</span>
+          </li>
+        </ul>
+      );
+    },
+    nonRefundable: () => {
+      return (
+        <ul className="[&>li]:flex [&>li]:justify-between [&>li]:items-center [&>li]:gap-2">
+          <li>
+            <span>Vehicle Subtotal: </span>
+            <span>{`THB ${formatPrice(
+              relevant_non_refundable_price
+            )} (non_refundable)`}</span>
+          </li>
+          <li>
+            <span>Tax:</span>
+            <span>USD 0</span>
+          </li>
+          <li className="text-base font-semibold pt-3 max-sm:flex-col">
+            <span>Your total price:</span>
+            <span>{`THB ${formatPrice(
+              relevant_non_refundable_price
+            )} (non refundable)`}</span>
+          </li>
+        </ul>
+      );
+    },
+  };
+  const CurrentPriceView = PriceView[selected_price];
 
   return (
     <>
       <p className="title pb-8">Booking Details</p>
-
       <CurrentPickupDetailsView
-        airportName={schema.airport.name}
+        airportName={airport_name}
         distance={range.text}
         hotelName={hotelAddress}
         pickupDate={pickupDate}
@@ -34,26 +84,12 @@ const CheckoutBookingDetails = (props) => {
       <div className="leading-relaxed pb-8 mb-10 border-b border-b-white">
         <p className="title">Car Class</p>
         <p className="font-bold">
-          {schema.car_class.name}
+          {car_class_name}
           <br />
-          {schema.car_class.description}
+          {car_class_description}
         </p>
       </div>
-
-      <ul className="[&>li]:flex [&>li]:justify-between [&>li]:items-center [&>li]:gap-2">
-        <li>
-          <span>Vehicle Subtotal: </span>
-          <span>{formatPrice(schema.base_price)}</span>
-        </li>
-        <li>
-          <span>Tax:</span>
-          <span>USD 0</span>
-        </li>
-        <li className="title pt-3 max-sm:flex-col">
-          <span>Your total price:</span>
-          <span>{formatPrice(schema.base_price)}</span>
-        </li>
-      </ul>
+      <CurrentPriceView />
     </>
   );
 };

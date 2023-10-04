@@ -1,37 +1,50 @@
 import CheckoutBookingDetails from "@/components/Checkout/CheckoutBookingDetails/CheckoutBookingDetails";
 import LoadingPage from "@/components/LoadingPage";
 import { useFindHotelAddress } from "@/hooks/useFindHotelAddress";
-import { useFindRelevantSchema } from "@/hooks/useFindRelevantSchema";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import DateInput from "@/components/CustomInputs/DateInput";
-import TimePicker from "react-time-picker";
 import TimeInput from "@/components/CustomInputs/TimeInput";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]";
 import { generateRandomOrderId } from "@/utils/generateRandomOrderId";
 import { useSession } from "next-auth/react";
+import useFindSingleRelevantSchema from "@/hooks/useFindSingleRelevantSchema";
+import useFindRange from "@/hooks/useFindRange";
 
-const Checkout = ({ thisAirport, allSchema, carData }) => {
+const Checkout = ({ thisAirport }) => {
   const { data: session, status } = useSession();
-  // console.log(session);
 
   const router = useRouter();
-  const { date, booking_type, hotel_place_id, guest_number, car_class_id } =
-    router.query;
-
-  const relevantSchema = useFindRelevantSchema(
-    carData,
-    thisAirport.place_id,
-    allSchema,
+  const {
+    date,
+    booking_type,
     hotel_place_id,
-    guest_number
-  );
-  // console.log(relevantSchema)
+    guest_number,
+    car_class_id,
+    airport_id,
+    selected_price,
+  } = router.query;
+
+  const range = useFindRange(thisAirport.place_id, hotel_place_id);
+  const { relevantSchema, relevantSchemaLoading, relevantSchemaError } =
+    useFindSingleRelevantSchema(
+      airport_id,
+      car_class_id,
+      range,
+      date,
+      guest_number
+    );
+
+  useEffect(() => {
+    if (!relevantSchemaLoading && (relevantSchemaError || !relevantSchema)) {
+      router.push("/error");
+    }
+  }, [router, relevantSchema, relevantSchemaLoading, relevantSchemaError]);
 
   const hotelAddress = useFindHotelAddress(hotel_place_id);
 
@@ -85,19 +98,24 @@ const Checkout = ({ thisAirport, allSchema, carData }) => {
       let pickup_point = "";
       let destination_point = "";
       if (booking_type === "airportpickup") {
-        pickup_point = relevantSchema.schema.airport.name;
+        pickup_point = relevantSchema.airport_name;
         destination_point = hotelAddress;
       }
       if (booking_type === "airportdropoff") {
         pickup_point = hotelAddress;
-        destination_point = relevantSchema.schema.airport.name;
+        destination_point = relevantSchema.airport_name;
       }
       // const pickup_date = new Date(date.getTime() - 8 * 60 * 60 * 1000);
-      const range = relevantSchema.range.value;
-      const total_price = relevantSchema.schema.refundable_base_price_1;
-      const price_schema_name = relevantSchema.schema.tier_name;
-      const car_class_name = relevantSchema.schema.car_class.name;
-      const airport_name = relevantSchema.schema.airport.name;
+      const distance = range.value;
+      let total_price = 0;
+      if (selected_price === "refundable") {
+        total_price = relevantSchema.relevant_refundable_price;
+      } else {
+        total_price = relevantSchema.relevant_non_refundable_price;
+      }
+      const price_schema_name = relevantSchema.tier_name;
+      const car_class_name = relevantSchema.car_class_name;
+      const airport_name = relevantSchema.airport_name;
       const order_no = generateRandomOrderId(f_name);
       const formData = {
         order_no,
@@ -118,7 +136,7 @@ const Checkout = ({ thisAirport, allSchema, carData }) => {
         total_suitcase: 0,
         car_class_name,
         airport_name,
-        range,
+        range: distance,
         total_price,
         price_schema_name,
         order_currency: "THB",
@@ -170,7 +188,7 @@ const Checkout = ({ thisAirport, allSchema, carData }) => {
       <Head>
         <title>Limosia - Checkout</title>
       </Head>
-      {!relevantSchema ? (
+      {relevantSchemaLoading || !relevantSchema ? (
         <LoadingPage />
       ) : (
         <>
@@ -419,7 +437,7 @@ const Checkout = ({ thisAirport, allSchema, carData }) => {
             <div className="sidebar lg:basis-[calc((100%-20px)*(40/100))] xxl:basis-[524px] max-lg:pt-10">
               <div className="w-full px-4 py-8 md:p-6 xl:p-10 rounded-[20px] bg-orange-light text-white [&_*]:!text-white">
                 <CheckoutBookingDetails
-                  bookingDetails={relevantSchema}
+                  bookingDetails={{ range, ...relevantSchema }}
                   hotelAddress={hotelAddress}
                   pickupDate={date}
                 />
@@ -459,25 +477,6 @@ const Checkout = ({ thisAirport, allSchema, carData }) => {
 export default Checkout;
 
 export async function getServerSideProps(context) {
-  const { airport_id, car_class_id } = context.query;
-
-  const apiPath = process.env.NEXT_PUBLIC_API_PATH;
-
-  const thisAirport = await fetch(`${apiPath}/airports/${airport_id}`).then(
-    (res) => res.json()
-  );
-  const allSchema = await fetch(
-    `${apiPath}/price-schema?page=1&limit=9999999&sortBy=ASC`
-  ).then((res) => res.json());
-
-  const res = await fetch(`${apiPath}/car-class/${car_class_id}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  const carData = await res.json();
-
   const session = await getServerSession(context.req, context.res, authOptions);
   if (!session) {
     return {
@@ -487,14 +486,45 @@ export async function getServerSideProps(context) {
       },
     };
   }
+  const { airport_id, booking_type, selected_price } = context.query;
+  const apiPath = process.env.NEXT_PUBLIC_API_PATH;
+  // Invalid Queries
+  if (
+    (booking_type != "airportpickup" && booking_type != "airportdropoff") ||
+    (selected_price != "refundable" && selected_price != "nonRefundable")
+  ) {
+    return {
+      redirect: {
+        destination: "/error",
+        permanent: false,
+      },
+    };
+  }
+
+  const fetchThisAirport = async (airportId) => {
+    const res = await fetch(`${apiPath}/airports/${airportId}`);
+    const resData = await res.json();
+    if (!res.ok) {
+      return;
+    }
+    return resData;
+  };
+
+  const thisAirport = await fetchThisAirport(airport_id);
+  if (!thisAirport) {
+    return {
+      redirect: {
+        destination: "/error",
+        permanent: false,
+      },
+    };
+  }
+
   // const access_token = session.access_token;
 
   return {
     props: {
       thisAirport,
-      allSchema,
-      // access_token:,
-      carData,
     },
   };
 }

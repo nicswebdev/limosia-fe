@@ -1,9 +1,10 @@
 import { getPrebookTime } from "@/utils/getPrebookTime";
 import React, { useState, useEffect } from "react";
 
-const useFindRelevantSchemas = (range, airport_id, date) => {
+const useFindRelevantSchemas = (range, airport_id, date, guest) => {
   const [relevantSchemas, setRelevantSchemas] = useState([]);
   const [loadingSchemas, setLoadingSchemas] = useState([true]);
+  const [relevantSchemasError, setRelevantSchemasError] = useState("");
   useEffect(() => {
     if (!range) {
       return;
@@ -15,11 +16,12 @@ const useFindRelevantSchemas = (range, airport_id, date) => {
       // return
       const apiPath = process.env.NEXT_PUBLIC_API_PATH;
       const res = await fetch(
-        `${apiPath}/price-schema/${airport_id}/${range?.value}/${prebookTime}`
+        `${apiPath}/price-schema/all_relevant_schemas/airport_id=${airport_id}/range=${range?.value}/prebook=${prebookTime}/guest=${guest}`
       );
       if (!res.ok) {
         if (res.status === 422) {
-          alert("Bad Field Error");
+          setRelevantSchemasError('Bad Field Error')
+          setLoadingSchemas(false)
         }
         return;
       }
@@ -34,6 +36,7 @@ const useFindRelevantSchemas = (range, airport_id, date) => {
   return {
     relevantSchemas,
     loadingSchemas,
+    relevantSchemasError
   };
 };
 
