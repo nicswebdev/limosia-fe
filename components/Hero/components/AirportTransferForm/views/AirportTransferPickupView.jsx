@@ -18,7 +18,7 @@ const AirportTransferPickupView = (props) => {
           className="form-control karla font-bold text-[16px]"
           onChange={handleAirportChange}
         >
-          <option value={undefined} selected disabled hidden>
+          <option value={undefined} hidden>
             Select Airport
           </option>
           {airportData.items.map((airport) => {

@@ -2,9 +2,8 @@ import CheckoutBookingDetails from "@/components/Checkout/CheckoutBookingDetails
 import LoadingPage from "@/components/LoadingPage";
 import { useFindHotelAddress } from "@/hooks/useFindHotelAddress";
 import Head from "next/head";
-import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import DateInput from "@/components/CustomInputs/DateInput";
@@ -202,19 +201,6 @@ const Checkout = ({ thisAirport }) => {
             <div className="main-content lg:basis-[calc((100%-20px)*(60/100))] xxl:basis-[630px]">
               <p className="title pb-8">Details</p>
               <div className="pb-8">
-                {/* <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 pb-3">
-                  <div className="relative">
-                    <span className="absolute top-[10px] left-8 text-xs text-gray-dark">
-                      Title
-                    </span>
-                    <select name="" id="" className="custom-select pt-6">
-                      <option value="">Mr.</option>
-                      <option value="">Mr.</option>
-                      <option value="">Mr.</option>
-                    </select>
-                  </div>
-                </div> */}
-
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-3 gap-x-5">
                   <div className="flex flex-col">
                     <label className="block pb-2 font-bold text-sm text-gray-dark">

@@ -91,9 +91,9 @@ const CarDetails = ({ thisAirportData }) => {
       </Head>
       <>
         <div className="main-container pt-6 pb-8 mt-28">
-          <ul class="breadcrumb-list">
+          <ul className="breadcrumb-list">
             <li>
-              <a class="flex flex-row items-center gap-[10px]">
+              <a className="flex flex-row items-center gap-[10px]">
                 <img
                   src="/assets/images/icons/material-symbols_home-rounded.svg"
                   alt=""
@@ -104,15 +104,15 @@ const CarDetails = ({ thisAirportData }) => {
             <li>Choose Cars</li>
           </ul>
         </div>
-        <div class="main-container pb-20 lg:pb-32">
-          <div class="sidebar">
+        <div className="main-container pb-20 lg:pb-32">
+          <div className="sidebar">
             {/* This is the car image */}
-            <div class="flex justify-center items-center w-full px-5 py-8 mb-9 rounded-[15px] bg-gray-light">
-              <img src={car_class_image} alt="Car" class="max-w-full" />
+            <div className="flex justify-center items-center w-full rounded-[15px] bg-gray-light">
+              <img src={car_class_image} alt="Car" className="object-fill" />
             </div>
           </div>
 
-          <div class="main-content">
+          <div className="main-content">
             {/* <ChangeBookingDetailsWidget allAirportData={allAirportData} /> */}
             <div className="px-4 py-8 md:p-6 xl:p-10 rounded-[15px] box-shadow text-black-2">
               <p className="title">Vehicle</p>
@@ -155,24 +155,24 @@ const CarDetails = ({ thisAirportData }) => {
                 </p>
               </div>
 
-              <hr class="my-8 border-[#D9D9D9]" />
+              <hr className="my-8 border-[#D9D9D9]" />
 
-              <div class="flex justify-between items-center">
-                <span class="text-gray-dark">Vehicle Subtotal: </span>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-dark">Vehicle Subtotal: </span>
                 <CurrentSelectedPrice />
               </div>
 
-              <div class="flex justify-between items-center">
-                <span class="text-gray-dark">tax: </span>
-                <span class="font-bold">THB 0</span>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-dark">tax: </span>
+                <span className="font-bold">THB 0</span>
               </div>
 
-              <div class="flex max-sm:flex-col justify-between sm:items-center pt-5">
-                <span class="title">Your total price:</span>
+              <div className="flex max-sm:flex-col justify-between sm:items-center pt-5">
+                <span className="title">Your total price:</span>
                 <CurrentSelectedPrice />
               </div>
-              <div class="pt-12">
-                <Link href={checkoutLink} class="btn-blue">
+              <div className="pt-12">
+                <Link href={checkoutLink} className="btn-blue">
                   <span>ACCEPT RATE AND PAY NOW</span>
                 </Link>
               </div>

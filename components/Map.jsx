@@ -39,7 +39,6 @@ const MapComponent = (props) => {
           (response, status) => {
             if (status === "OK") {
               directionsRenderer.setDirections(response);
-              const route = response.routes[0].legs[0];
             } else {
               // alert("Directions request failed due to " + status);
               console.error("Directions request failed", response);

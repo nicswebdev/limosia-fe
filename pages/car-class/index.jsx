@@ -36,14 +36,14 @@ const CarClass = ({ allAirportData, thisAirport }) => {
       <Head>
         <title>Quicco - Car Search</title>
       </Head>
-      <div class="main-container pt-6 pb-8 mt-28">
-        <ul class="breadcrumb-list">
+      <div className="main-container pt-6 pb-8 mt-28">
+        <ul className="breadcrumb-list">
           <li>
-            <a class="flex flex-row items-center gap-[0.625rem]">
+            <a className="flex flex-row items-center gap-[0.625rem]">
               <img
                 src="/assets/images/icons/material-symbols_home-rounded.svg"
                 alt=""
-                class="w-6"
+                className="w-6"
               />
               <span>Reservation</span>
             </a>
@@ -51,26 +51,26 @@ const CarClass = ({ allAirportData, thisAirport }) => {
           <li>Choose Cars</li>
         </ul>
       </div>
-      <div class="main-container pb-20 lg:pb-32">
-        <div class="sidebar">
-          <p class="title pb-5">ROUTE MAP</p>
+      <div className="main-container pb-20 lg:pb-32">
+        <div className="sidebar">
+          <p className="title pb-5">ROUTE MAP</p>
           <MapComponent
             booking_type={booking_type}
             airport_place_id={airport_place_id}
             hotel_place_id={hotel_place_id}
           />
 
-          <div class="leading-relaxed">
+          <div className="leading-relaxed">
             <p>
-              Total Range: <span class="font-bold">{range?.text}</span>
+              Total Range: <span className="font-bold">{range?.text}</span>
             </p>
             <p>
-              Total Duration: <span class="font-bold">{range?.duration}</span>
+              Total Duration: <span className="font-bold">{range?.duration}</span>
             </p>
           </div>
         </div>
 
-        <div class="main-content">
+        <div className="main-content">
           {openLoginDialog && (
             <LoginModal
               destinationLink={destinationLink}
@@ -82,7 +82,7 @@ const CarClass = ({ allAirportData, thisAirport }) => {
           {loadingSchemas ? (
             <LoadingPage />
           ) : (
-            <div class="flex flex-col gap-8">
+            <div className="flex flex-col gap-8">
               {relevantSchemas?.items?.map((item) => {
                 const {
                   id,
@@ -105,50 +105,50 @@ const CarClass = ({ allAirportData, thisAirport }) => {
                 return (
                   <>
                     {/* Car Image */}
-                    <div class="car-card" key={id}>
-                      <div class="image-wrap">
+                    <div className="car-card" key={id}>
+                      <div className="image-wrap bg-[url('/img/hero-pattern.svg')]">
                         <img
                           src={car_class_image}
                           alt="Car"
-                          className="max-xl:max-w-full xl:w-full h-full object-contain"
+                          className="max-xl:max-w-full xl:w-full h-full object-fill"
                         />
                       </div>
                       {/* Car Details */}
-                      <div class="detail-wrap">
+                      <div className="detail-wrap">
                         {/* Car Name */}
-                        <p class="title">{car_class_name}</p>
+                        <p className="title">{car_class_name}</p>
                         {/* Car Description */}
-                        <p class="font-bold text-gray-dark">
+                        <p className="font-bold text-gray-dark">
                           {car_class_description}
                         </p>
                         {/* Car More Details */}
-                        <ul class="facility-list">
+                        <ul className="facility-list">
                           {/* Car Max Guest */}
                           <li>
                             <img
                               src="/assets/images/icons/ic_round-people-alt.svg"
                               alt="Icon"
-                              class="w-6"
+                              className="w-6"
                             />
-                            <p class="text-sm font-bold">{max_guest} People</p>
+                            <p className="text-sm font-bold">{max_guest} People</p>
                           </li>
                           {/* Car Max Suitcase */}
                           <li>
                             <img
                               src="/assets/images/icons/fa-solid_luggage-cart.svg"
                               alt="Icon"
-                              class="w-6"
+                              className="w-6"
                             />
-                            <p class="text-sm font-bold">{max_suitcase} pcs</p>
+                            <p className="text-sm font-bold">{max_suitcase} pcs</p>
                           </li>
                         </ul>
                         {/* Relevant prices book */}
                         <div className="grid grid-cols-1 gap-8">
                           {/* Relevant Refundable Price Section */}
                           {relevant_refundable_price > 0 && (
-                            <div class="flex max-sm:flex-col justify-between items-center">
+                            <div className="flex max-sm:flex-col justify-between items-center">
                               {/* Refundable price from schema */}
-                              <p class="text-lg md:text-base font-bold max-sm:pb-5 sm:pr-4">
+                              <p className="text-lg md:text-base font-bold max-sm:pb-5 sm:pr-4">
                                 {`THB ${new Intl.NumberFormat("en-US").format(
                                   relevant_refundable_price
                                 )}`}{" "}
@@ -166,7 +166,7 @@ const CarClass = ({ allAirportData, thisAirport }) => {
                                   setDestinationLink(booklink);
                                   setOpenLoginDialog(true);
                                 }}
-                                class="btn-blue text-lg md:text-sm py-2 px-6 flex-shrink-0"
+                                className="btn-blue text-lg md:text-sm py-2 px-6 flex-shrink-0"
                               >
                                 <span>BOOK NOW</span>
                               </button>
@@ -174,9 +174,9 @@ const CarClass = ({ allAirportData, thisAirport }) => {
                           )}
                           {/* Relevant non refundable price section */}
                           {relevant_non_refundable_price > 0 && (
-                            <div class="flex max-sm:flex-col justify-between items-center">
+                            <div className="flex max-sm:flex-col justify-between items-center">
                               {/* Car price from schema */}
-                              <p class="text-lg md:text-base font-bold max-sm:pb-5 sm:pr-4">
+                              <p className="text-lg md:text-base font-bold max-sm:pb-5 sm:pr-4">
                                 {`THB ${new Intl.NumberFormat("en-US").format(
                                   relevant_non_refundable_price
                                 )}`}{" "}
@@ -194,7 +194,7 @@ const CarClass = ({ allAirportData, thisAirport }) => {
                                   setDestinationLink(booklink);
                                   setOpenLoginDialog(true);
                                 }}
-                                class="btn-blue text-lg md:text-sm py-2 px-6 flex-shrink-0"
+                                className="btn-blue text-lg md:text-sm py-2 px-6 flex-shrink-0"
                               >
                                 <span>BOOK NOW</span>
                               </button>

@@ -5,8 +5,9 @@ import AirportTransferForm from "./components/AirportTransferForm/AirportTransfe
 import { formatPrice } from "@/utils/formatPrice";
 import MainTab from "./components/MainTab/MainTab";
 import DayRentalForm from "./components/DayRentalForm/DayRentalForm";
+import HeroSkeleton from "./views/HeroSkeleton";
 
-const Hero = ({ airportData, cheapestSchema }) => {
+const Hero = ({ airportData, threeCheapestSchema, loading }) => {
   const [mainTab, setMainTab] = useState("airporttransfer");
   const changeMainTab = (value) => {
     setMainTab(value);
@@ -28,27 +29,31 @@ const Hero = ({ airportData, cheapestSchema }) => {
           fill
           className="object-cover w-full h-full"
         />
-        <div className="absolute right-[7%]  md:right-[5%] top-[20%]  w-[85%] md:w-[30%]">
-          <MainTab activeTab={mainTab} changeTab={changeMainTab} />
-          <div className="bg-white h-auto rounded-md p-4">
-            <ShownForm airportData={airportData} />
-            <div className="flex justify-center gap-10 mt-3">
-              {cheapestSchema &&
-                cheapestSchema.map((value) => {
-                  return (
-                    <div key={value.id} className="karla  font-bold">
-                      <h1 className="text-[12px] text-center">
-                        {value.car_class.name} from:
-                      </h1>
-                      <p className="text-center">
-                        THB {formatPrice(value.base_price)}
-                      </p>
-                    </div>
-                  );
-                })}
+        {loading ? (
+          <HeroSkeleton />
+        ) : (
+          <div className="absolute right-[7%]  md:right-[5%] top-[20%]  w-[85%] md:w-[30%]">
+            <MainTab activeTab={mainTab} changeTab={changeMainTab} />
+            <div className="bg-white h-auto rounded-md p-4">
+              <ShownForm airportData={airportData} />
+              <div className="flex justify-center gap-10 mt-3">
+                {threeCheapestSchema &&
+                  threeCheapestSchema.map((value) => {
+                    return (
+                      <div key={value.id} className="karla  font-bold">
+                        <h1 className="text-[12px] text-center">
+                          {value.name} from:
+                        </h1>
+                        <p className="text-center">
+                          THB {formatPrice(value.cheapest_base_price)}
+                        </p>
+                      </div>
+                    );
+                  })}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
